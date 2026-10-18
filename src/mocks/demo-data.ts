@@ -64,7 +64,7 @@ function buildIncidents(): Incident[] {
 let demoIncidents: Incident[] | null = null;
 const getIncidents = () => (demoIncidents ??= buildIncidents());
 
-const delay = <T,>(v: T) => new Promise<T>((res) => setTimeout(() => res(structuredClone(v)), 150));
+const delay = <T,>(v: T) => Promise.resolve(structuredClone(v));
 
 export const demo = {
   listIncidents: () => delay(getIncidents()),

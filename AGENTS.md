@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 # Architecture rules
+- Cache demo query results until mutation invalidation or explicit refresh, and keep live polling intact — avoids redundant loading when switching pages without mixing sources.
 - All data access goes through hooks in `src/hooks/use-data.tsx`, which switch between `src/mocks/` (demo) and `src/services/backend.ts` (live) — keeps demo and real records strictly separated.
 - Backend payloads are validated with zod schemas in `src/types/` — the real pipeline output format is unverified.
 - The browser never runs detection or talks to MQTT directly; it only renders backend-provided streams/metadata — perception lives in the PipeGen/TensorRT/DeepStream pipeline.
