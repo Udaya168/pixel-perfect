@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState, useEffect } from 'react';
-import { ReactFlow, Background, Handle, Position, MarkerType, getNodesBounds, getViewportForBounds, type Node, type NodeProps, type ReactFlowInstance } from '@xyflow/react';
+import { ReactFlow, Background, Handle, Position, MarkerType, getNodesBounds, type Node, type NodeProps, type ReactFlowInstance } from '@xyflow/react';
 import { Camera, Cpu, ScanLine, Database, Radio, Download, Maximize2, Minimize2, RotateCcw, ZoomIn, ZoomOut, Scan, Network, List, LoaderCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { NodeDetails, StatusBadge } from './NodeDetails';
@@ -47,12 +47,31 @@ export function ArchitectureDiagram({ diagram }: { diagram: DiagramData }) {
     if (!viewport || !instance) return;
     setExporting(true); setError('');
     try {
-      const { toPng, toSvg } = await import('html-to-image');
       const bounds = getNodesBounds(instance.getNodes());
-      const width = 1600, height = Math.max(900, Math.ceil((bounds.height / bounds.width) * width));
-      const fit = getViewportForBounds(bounds, width, height, 0.1, 2, 0.15);
-      const backgroundColor = getComputedStyle(workspace.current ?? viewport).getPropertyValue('--panel').trim();
-      const url = await (format === 'png' ? toPng : toSvg)(viewport, { backgroundColor, width, height, pixelRatio: 1, style: { width: `${width}px`, height: `${height}px`, transform: `translate(${fit.x}px, ${fit.y}px) scale(${fit.zoom})` } });
+      const css = getComputedStyle(viewport);
+      const color = (token: string) => css.getPropertyValue(token).trim();
+      const escape = (value: string) => value.replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' })[character] ?? character);
+      const lines = (value: string) => value.split(' ').reduce<string[]>((result, word) => { const last = result.at(-1); if (last && `${last} ${word}`.length <= 30) result[result.length - 1] = `${last} ${word}`; else result.push(word); return result; }, []);
+      const width = Math.ceil(bounds.width + 120), height = Math.ceil(bounds.height + 160);
+      const edgeSvg = Array.from(viewport.querySelectorAll('.react-flow__edge')).map(edge => {
+        const path = edge.querySelector('path.react-flow__edge-path');
+        const label = edge.querySelector('.react-flow__edge-text');
+        return `<path d="${escape(path?.getAttribute('d') ?? '')}" fill="none" stroke="${color('--muted-foreground')}" stroke-width="1.5" ${edge.classList.contains('architecture-flow-dashed') ? 'stroke-dasharray="5 4"' : ''} marker-end="url(#arrow)"/>${label ? `<text x="${label.getAttribute('x')}" y="${label.getAttribute('y')}" text-anchor="middle" font-size="10" fill="${color('--muted-foreground')}" paint-order="stroke" stroke="${color('--panel')}" stroke-width="4">${escape(label.textContent ?? '')}</text>` : ''}`;
+      }).join('');
+      const nodeSvg = diagram.nodes.map(node => {
+        const roleColor = color(`--architecture-${node.role}`);
+        const title = lines(node.label), summary = lines(node.summary);
+        return `<g transform="translate(${node.x},${node.y})"><rect width="265" height="172" rx="6" fill="${color('--card')}" stroke="${roleColor}" ${node.optional ? 'stroke-dasharray="5 4"' : ''}/><text x="16" y="25" font-size="10" fill="${roleColor}">${node.role.toUpperCase()}</text>${title.map((line, i) => `<text x="16" y="${49 + i * 18}" font-size="14" font-weight="600" fill="${color('--foreground')}">${escape(line)}</text>`).join('')}${summary.map((line, i) => `<text x="16" y="${55 + title.length * 18 + i * 16}" font-size="11" fill="${color('--muted-foreground')}">${escape(line)}</text>`).join('')}<text x="16" y="155" font-size="10" fill="${color(node.status === 'Implemented' ? '--success' : node.status === 'Planned' ? '--architecture-input' : '--warning')}">${node.status}${node.external ? ' · External' : ''}${node.optional ? ' · Optional' : ''}</text></g>`;
+      }).join('');
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><rect width="100%" height="100%" fill="${color('--panel')}"/><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="${color('--muted-foreground')}"/></marker></defs><g font-family="Arial, sans-serif"><text x="40" y="30" font-size="16" fill="${color('--foreground')}">${escape(diagram.title)} · Intended / pipeline unverified</text><g transform="translate(${60 - bounds.x},${80 - bounds.y})">${edgeSvg}${nodeSvg}</g></g></svg>`;
+      let url = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+      if (format === 'png') {
+        const image = new Image(); image.src = url; await image.decode();
+        const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height;
+        const context = canvas.getContext('2d');
+        if (!context) throw new Error('Image export unavailable');
+        context.drawImage(image, 0, 0); url = canvas.toDataURL('image/png');
+      }
       const link = document.createElement('a'); link.download = `safety-sentinel-${diagram.id}.${format}`; link.href = url; link.click();
     } catch { setError('Export failed. Please try again.'); } finally { setExporting(false); }
   }
