@@ -1,78 +1,76 @@
 export type NodeRole = 'input' | 'inference' | 'analytics' | 'storage' | 'output';
-export type ArchitectureNode = { id: string; label: string; role: NodeRole; detail: string; x: number; y: number; optional?: boolean; status: 'Planned' };
-export type ArchitectureEdge = { from: string; to: string; control?: boolean; optional?: boolean };
-export type ArchitectureDiagram = { id: string; title: string; description: string; nodes: ArchitectureNode[]; edges: ArchitectureEdge[]; height: number; boundaries?: { label: string; x: number; y: number; width: number; height: number }[]; details: string[] };
-type Step = [string, NodeRole, string, boolean?];
+export type ImplementationStatus = 'Implemented' | 'Planned' | 'Unverified';
+export type ArchitectureNode = { id: string; label: string; role: NodeRole; detail: string; summary: string; x: number; y: number; optional?: boolean; external: boolean; status: ImplementationStatus; inputs: string[]; outputs: string[]; dependencies: string[] };
+export type ArchitectureEdge = { from: string; to: string; label: string; control?: boolean; optional?: boolean };
+export type ArchitectureDiagram = { id: string; title: string; description: string; nodes: ArchitectureNode[]; edges: ArchitectureEdge[]; height: number; details: string[] };
+type Step = { label: string; role: NodeRole; summary: string; purpose: string; output: string; dependencies: string[]; status?: ImplementationStatus; external?: boolean; optional?: boolean };
 function sequence(id: string, title: string, description: string, steps: Step[], details: string[]): ArchitectureDiagram {
-  const nodes: ArchitectureNode[] = steps.map(([label, role, detail, optional], i) => {
-    const row = Math.floor(i / 3);
-    return { id: `${id}-${i}`, label, role, detail, x: 30 + (row % 2 === 0 ? i % 3 : 2 - i % 3) * 310, y: 55 + row * 145, optional: optional ?? false, status: 'Planned' };
-  });
-  return { id, title, description, nodes, edges: nodes.slice(1).map((node, i) => ({ from: nodes[i]?.id ?? '', to: node.id, optional: node.optional ?? false })), height: Math.ceil(steps.length / 3) * 145 + 40, details };
+  const nodes = steps.map((step, i): ArchitectureNode => ({ id: `${id}-${i}`, label: step.label, role: step.role, summary: step.summary, detail: step.purpose, status: step.status ?? 'Unverified', external: step.external ?? true, optional: step.optional ?? false, inputs: [i === 0 ? 'Configured source / requirements' : steps[i - 1]?.output ?? 'Upstream payload'], outputs: [step.output], dependencies: step.dependencies, x: (Math.floor(i / 3) % 2 === 0 ? i % 3 : 2 - i % 3) * 330, y: Math.floor(i / 3) * 250 }));
+  return { id, title, description, nodes, edges: nodes.slice(1).map((node, i) => ({ from: nodes[i]?.id ?? '', to: node.id, label: steps[i]?.output ?? 'Data', optional: node.optional ?? false })), height: Math.ceil(steps.length / 3) * 250, details };
 }
+const video: Step = { label: 'Video Source', role: 'input', summary: 'Local test video; camera input planned', purpose: 'Supply repeatable video for the restricted-zone MVP. CCTV/NVR input is a future adapter, not verified ingestion.', output: 'Video frames', dependencies: ['Local test video', 'Source timestamps'], status: 'Planned' };
+const pipegen: Step = { label: 'PipeGen Pipeline', role: 'inference', summary: 'v0.5.1 pipeline integration', purpose: 'Translate the selected perception workflow into a validated pipeline configuration. No compilation success is established.', output: 'Pipeline artifacts', dependencies: ['PipeGen v0.5.1', 'Compatible model artifacts'] };
+const engine: Step = { label: 'TensorRT Inference', role: 'inference', summary: 'Target-compatible GPU engine', purpose: 'Build and execute an engine compatible with the target GPU, model and runtime versions. Build logs and inference results remain unverified.', output: 'Inference tensors', dependencies: ['TensorRT', 'NVIDIA RTX 3050 · 4 GB VRAM', 'Validated model'] };
+const runtime: Step = { label: 'DeepStream Runtime', role: 'inference', summary: 'GPU video and metadata processing', purpose: 'Execute the engine against video and expose detection/tracking metadata. GPU access alone does not prove successful inference.', output: 'Tracked metadata', dependencies: ['DeepStream', 'TensorRT engine', 'NVIDIA GPU access'] };
+const safety: Step = { label: 'Safety Analytics', role: 'analytics', summary: 'Evaluate restricted-zone transitions', purpose: 'Evaluate an outside-to-inside transition from person tracks and configured polygons. Suppress duplicate entries per camera, track and zone.', output: 'Safety events', dependencies: ['Confirmed person class', 'Tracking IDs', 'Zone polygons'], status: 'Planned' };
+const logging: Step = { label: 'Incident / Event Output', role: 'storage', summary: 'Timestamped JSON incident records', purpose: 'Assign event IDs and timestamps and persist incident JSON independently of optional MQTT delivery. Evidence is included only when available.', output: 'JSON incidents', dependencies: ['Validated event schema', 'Persistent log destination'], status: 'Planned' };
+const frontend: Step = { label: 'Frontend Dashboard', role: 'output', summary: 'Existing demo/live presentation', purpose: 'Render backend-provided streams and validated records. Existing demo records, zone editing and incident review are implemented; real pipeline integration is unverified.', output: 'Incident review', dependencies: ['Validated backend adapter', 'Existing data hooks'], status: 'Implemented', external: false };
+const mqtt: Step = { label: 'MQTT Publisher', role: 'output', summary: 'Optional asynchronous delivery', purpose: 'Publish events in the backend with bounded reconnection and independent delivery status. The browser does not connect to MQTT or hold broker credentials.', output: 'MQTT message', dependencies: ['Backend publisher', 'Broker settings', 'Server-side credentials'], status: 'Planned', optional: true };
 export const architectureDiagrams: ArchitectureDiagram[] = [
-  sequence('overall', 'Overall System Architecture', 'From video ingestion to actionable safety events, with independent reporting and alerting paths.', [
-    ['CCTV / Local Video', 'input', 'Repeatable local video is the MVP input. CCTV and NVR ingestion are planned.'],
-    ['NVR / Video Source', 'input', 'A source manager supplies local video; an NVR adapter is a planned alternative.'],
-    ['Stream Processing', 'inference', 'Decode and preprocess frames before inference.'],
-    ['Deep Learning Models', 'inference', 'Model selection, supported classes and engine compatibility are unverified.'],
-    ['Business Logic Layer', 'analytics', 'Evaluate safety rules against tracked detection metadata.'],
-    ['Alerting Engine', 'output', 'Produce actionable notifications and incident records.'],
-  ], ['Video ingestion supplies frames; stream processing normalizes them; AI inference produces detections.', 'Safety-rule evaluation creates incidents. The central database supplies the reporting engine, while the alerting engine supplies notifications and incident records.']),
-  sequence('pipegen', 'PipeGen Compilation & Runtime', 'PipeGen v0.5.1 is the core compiler workflow; runtime inference is a separate execution stage.', [
-    ['Requirement', 'input', 'Restricted-zone entry from a repeatable input video.'],
-    ['Pipeline IR', 'inference', 'PipeGen Intermediate Representation expresses pipeline requirements.'],
-    ['Model Integration', 'inference', 'Select compatible model artifacts and confirm person classes.'],
-    ['Compiler & Validation', 'inference', 'PipeGen v0.5.1 validates pipeline configuration and generates artifacts. No compilation success is claimed.'],
-    ['TensorRT Engine', 'inference', 'Build a target-compatible engine; retain build logs and engine artifacts.'],
-    ['DeepStream Runtime', 'inference', 'Run the compiled pipeline on an NVIDIA GPU using the configured input video.'],
-    ['Actionable Output', 'output', 'Structured detections feed safety events, JSON logs and dashboard integration.'],
-    ['Runtime Monitoring', 'analytics', 'Collect runtime diagnostics and only report measurements actually supplied by the pipeline.'],
-  ], ['Compilation: requirement → IR → model integration → compiler validation → TensorRT engine. Configuration, selected models, generated artifacts and validation logs must be retained.', 'Runtime: input video + engine + runtime configuration → DeepStream on NVIDIA GPU → actionable output. Compilation and runtime execution are both unverified.']),
-  sequence('inference', 'Video Inference & Metadata Flow', 'Detection and tracking remain on the edge; the browser only receives backend-provided streams and metadata.', [
-    ['Video Input', 'input', 'A repeatable local video source.'], ['Frame Decoding', 'inference', 'Extract and decode video frames.'], ['Preprocessing', 'inference', 'Resize and normalize according to the chosen model.'], ['Object Detection', 'inference', 'Detector and supported classes are not yet confirmed; no YOLO or PPE capability is assumed.'], ['Boxes / Classes / Scores', 'inference', 'Bounding boxes, class labels and confidence scores from the detector.'], ['Postprocessing / NMS', 'inference', 'Apply non-maximum suppression where the selected model requires it.'], ['Object Tracking', 'inference', 'Associate person detections with tracking IDs.'], ['Detection Metadata', 'output', 'A backend adapter converts runtime metadata into validated payloads.'], ['Safety Analytics', 'analytics', 'Use structured metadata for zone evaluation and safety rules.'],
-  ], ['Model choice and class mappings must be confirmed before claiming person or PPE detection capabilities.', 'The DeepStream metadata adapter is required. The proposed frontend contract does not establish the actual pipeline output format.']),
-  sequence('events', 'Safety-Event Processing', 'Restricted-zone entry is the primary MVP; incident review and notification follow event generation.', [
-    ['Video Frames', 'input', 'Decoded frames with source timestamps.'], ['Person Detection', 'inference', 'Requires a confirmed person class.'], ['Object Tracking', 'inference', 'Associate detections with stable tracking IDs.'], ['Restricted-Zone Evaluation', 'analytics', 'Compare person position against configured camera-zone polygons.'], ['Zone-Entry Rule', 'analytics', 'Evaluate an outside-to-inside transition; suppress duplicate entries per camera, track and zone.'], ['Incident Generation', 'analytics', 'Generate timestamped event IDs and optional evidence references.'], ['JSON Incident Log', 'storage', 'Persist incidents independently of MQTT delivery.'], ['Dashboard / Notification', 'output', 'Show incident records and status review; notifications are an optional integration.'],
-  ], ['Configurable zone polygons exist in the frontend; backend application and real detection remain unverified.', 'Duplicate-event suppression must be implemented and tested in the event engine. Review status must remain independent from delivery status.', 'Near-miss detection, dwell time, PPE checks and advanced spatial analytics are optional future extensions, not verified pipeline features.']),
-  sequence('deployment', 'Deployment Architecture', 'Target environment only — installation, GPU passthrough, compilation and runtime operation require separate evidence.', [
-    ['Windows / RTX 3050', 'input', 'Target hardware: NVIDIA RTX 3050 with 4 GB VRAM; installation and hardware validation are unverified.'], ['WSL2 Ubuntu 24.04', 'inference', 'Target Linux environment; not confirmed installed.'], ['Docker / NVIDIA Toolkit', 'inference', 'Target container runtime and GPU access; not confirmed installed.'], ['PipeGen v0.5.1', 'inference', 'Target compiler workflow in the GPU container.'], ['DeepStream / TensorRT', 'inference', 'Target runtime and engine stack; not confirmed compiled or executed.'], ['NVIDIA GPU Inference', 'inference', 'GPU passthrough alone does not verify inference.'], ['Safety Analytics', 'analytics', 'Restricted-zone entry processing from tracking metadata.'], ['Incident Output', 'storage', 'Timestamped JSON incident logs and evidence references.'], ['External Consumer', 'output', 'Optional MQTT broker, dashboard or notification consumer.', true],
-  ], ['Local test video, pipeline configuration and logs are mounted into the container as input/output artifacts.', 'Status meanings: Installed = installation evidence; In Progress = confirmed ongoing setup; Planned = target only; Verified Working = observed operation. All external components are Planned because status evidence is unavailable.']),
-  sequence('mqtt', 'MQTT & Actionable Output', 'Optional notification transport. JSON incident logging does not depend on MQTT being enabled or connected.', [
-    ['Safety Event Engine', 'analytics', 'Creates a restricted-zone incident.'], ['Event Publisher', 'output', 'Backend publisher handles connection failures and optional MQTT transport.', true], ['MQTT Broker', 'output', 'Broker connection and operation are unverified.', true], ['Subscriber / Dashboard', 'output', 'MQTT consumer or external monitoring dashboard; browser integration uses the backend, not MQTT directly.', true],
-  ], ['Connection handling, reconnect with bounded backoff and delivery failure reporting belong in the backend publisher. QoS is configurable (0, 1 or 2); QoS 1 is a proposal, not an observed setting.', 'Optional TLS requires trusted broker certificates and server-side credentials. Secrets never belong in browser configuration.', 'The sample event below is illustrative, not a confirmed backend schema. JSON logs remain independent of optional transport.']),
-  sequence('modules', 'Software-Module Architecture', 'Separate real-time inference, incident persistence and optional notification paths.', [
-    ['Video Source Manager', 'input', 'Choose and validate video source configuration.'], ['Decoder & Preprocessor', 'inference', 'Decode, resize and normalize frames.'], ['Detection Inference', 'inference', 'Run a confirmed model through TensorRT / DeepStream.'], ['Object Tracking', 'inference', 'Associate detections with person track IDs.'], ['Spatial / Zone Manager', 'analytics', 'Manage restricted-zone geometry and spatial membership.'], ['Safety Rules Engine', 'analytics', 'Evaluate zone-entry transitions and suppress duplicates.'], ['Incident Manager', 'analytics', 'Assign event IDs, timestamps and severity.'], ['Evidence & JSON Logging', 'storage', 'Persist event logs and available evidence references.'], ['Dashboard/API Integration', 'output', 'Adapt validated records and streams for the existing dashboard.'], ['MQTT Publisher', 'output', 'Optional asynchronous notification transport, not part of the inference path.', true], ['Configuration & Health', 'analytics', 'Control configuration and expose measured diagnostics.'],
-  ], ['Real-time path: source → decoder → inference → tracking → spatial analytics → rules → incident manager.', 'Reporting path: incident manager → evidence and JSON logging → dashboard/API. Notification path: incident manager → optional MQTT publisher.', 'Configuration and health monitoring control the pipeline and consume diagnostics; they are not a serial inference stage.']),
+  sequence('overall', 'Overall System Architecture', 'Video ingestion, edge perception and independent incident, dashboard and notification paths.', [video, { label: 'Input Adapter', role: 'input', summary: 'Normalize source configuration', purpose: 'Validate the local video source and adapt frames for the generated pipeline.', output: 'Adapted input', dependencies: ['Source configuration'], status: 'Planned' }, pipegen, engine, runtime, safety, logging, frontend, { ...mqtt, label: 'MQTT Output' }], ['Frontend presentation is implemented with sample data. No end-to-end perception verification is available.', 'Incident logging and dashboard reads do not depend on optional MQTT transport.']),
+  sequence('pipegen', 'PipeGen Compilation & Runtime', 'Compilation produces artifacts; deployment and inference require separate verification.', [
+    { label: 'Pipeline Requirements', role: 'input', summary: 'Restricted-zone entry MVP', purpose: 'Define the repeatable-video input, person detection and actionable event requirements.', output: 'Requirements', dependencies: ['MVP specification'], status: 'Planned' },
+    { label: 'Pipeline IR / Configuration', role: 'inference', summary: 'Describe the perception workflow', purpose: 'Express source, model and processing requirements in PipeGen intermediate representation/configuration.', output: 'Pipeline IR', dependencies: ['PipeGen IR contract'] },
+    { label: 'Model Selection', role: 'inference', summary: 'Confirm model classes and compatibility', purpose: 'Select compatible artifacts and confirm a person class before claiming detection. No YOLO or PPE capability is assumed.', output: 'Model artifacts', dependencies: ['Model class mapping', 'Target runtime versions'] },
+    { ...pipegen, label: 'PipeGen Compilation & Validation', output: 'Validated build configuration' },
+    { ...engine, label: 'TensorRT Engine', output: 'Engine artifact' },
+    { ...runtime, label: 'DeepStream Deployment', output: 'Runtime configuration' },
+    { ...engine, label: 'Runtime Inference', output: 'Detection metadata' },
+    { ...logging, label: 'Actionable Results' },
+  ], ['Compilation: requirements → IR → selected model → validation → engine. Retain configuration, artifacts and logs.', 'Runtime: video + engine + runtime configuration → GPU inference → events. Both stages are unverified.']),
+  sequence('inference', 'Video Inference & Metadata Flow', 'Perception stays on the edge; only adapted streams and metadata reach the browser.', [
+    { ...video, label: 'Local Test Video / Camera' },
+    { label: 'Frame Ingestion', role: 'input', summary: 'Decode frames and timestamps', purpose: 'Decode source video while preserving camera identity and source timestamps.', output: 'Decoded frames', dependencies: ['Decoder', 'Input adapter'] },
+    { label: 'Preprocessing', role: 'inference', summary: 'Model-specific resize and normalization', purpose: 'Prepare frames for the selected model, respecting input shape, scaling and normalization.', output: 'Input tensors', dependencies: ['Selected model input specification'] },
+    { label: 'Object Detection', role: 'inference', summary: 'Boxes, classes and confidence', purpose: 'Execute the selected detector and apply required postprocessing/NMS. Person and PPE classes are not yet confirmed.', output: 'Detections', dependencies: ['Validated model', 'TensorRT engine'] },
+    { ...runtime, label: 'Tracking / Metadata', output: 'Camera + track metadata' },
+    { ...safety, label: 'Safety-Event Evaluation' },
+    { ...logging, label: 'Timestamped JSON Event' },
+  ], ['A DeepStream metadata adapter must map real runtime output into the proposed validated frontend contract.', 'No measured FPS, latency, GPU load or accuracy is claimed.']),
+  sequence('events', 'Safety-Event Processing', 'Restricted-zone transitions become incidents with independent review and delivery status.', [
+    { ...video, label: 'Video Frames' }, { ...runtime, label: 'Detection / Tracking' },
+    { label: 'Restricted-Zone Geometry', role: 'analytics', summary: 'Configured camera-space polygons', purpose: 'Load camera-specific restricted-zone polygons and test tracked object positions for membership. The frontend editor exists; backend application is unverified.', output: 'Zone membership', dependencies: ['Camera coordinates', 'Validated polygons'], status: 'Planned' },
+    { label: 'Object / Track Enters Zone', role: 'analytics', summary: 'Outside-to-inside transition', purpose: 'Compare previous and current membership for a stable camera/track/zone identity.', output: 'Entry transition', dependencies: ['Stable track IDs', 'Previous zone membership'], status: 'Planned' },
+    { ...safety, label: 'Rule Evaluation' }, { ...logging, label: 'Incident Creation', output: 'Incident record' }, { ...logging, label: 'Timestamped Incident Log' }, { ...frontend, label: 'Dashboard Alert', summary: 'Existing incident review; live alert unverified' },
+  ], ['Duplicate suppression belongs in the external event engine and must be implemented and tested there.', 'Incident review status remains independent from notification delivery status.']),
+  sequence('deployment', 'Deployment Architecture', 'Target environment only: installations, GPU access and execution need evidence.', [
+    { label: 'Windows Host', role: 'input', summary: 'RTX 3050 · 4 GB VRAM target', purpose: 'Host the target GPU and Linux/container environment. Hardware validation and installation are unverified.', output: 'Host environment', dependencies: ['NVIDIA RTX 3050 · 4 GB VRAM', 'Windows'], status: 'Planned' },
+    { label: 'WSL2 Ubuntu 24.04', role: 'inference', summary: 'Target Linux environment', purpose: 'Provide the target Linux userspace for the GPU container workflow; installation is not confirmed.', output: 'Linux environment', dependencies: ['WSL2', 'Ubuntu 24.04'], status: 'Planned' },
+    { label: 'NVIDIA GPU Access', role: 'inference', summary: 'Driver and GPU passthrough', purpose: 'Expose the NVIDIA GPU to Linux and containers. Passthrough does not establish inference capability.', output: 'GPU device access', dependencies: ['Compatible NVIDIA driver', 'WSL GPU support'] },
+    { label: 'Docker / NVIDIA Container Toolkit', role: 'inference', summary: 'GPU-enabled container target', purpose: 'Launch a compatible GPU runtime container with video/config/log mounts.', output: 'GPU container', dependencies: ['Docker', 'NVIDIA Container Toolkit'], status: 'Planned' },
+    { ...engine, label: 'PipeGen-Generated TensorRT Engine', output: 'Engine artifact', dependencies: ['PipeGen v0.5.1', ...engine.dependencies] }, runtime,
+    { ...logging, label: 'Output / Event Service' },
+  ], ['Local test video, configuration and generated logs are mounted as input/output artifacts.', 'All installation and runtime claims need independent verification evidence.']),
+  sequence('mqtt', 'MQTT & Actionable Output', 'Optional transport branches from JSON events; incident persistence remains independent.', [
+    { ...runtime, label: 'Inference Metadata' }, { ...safety, label: 'Safety Rules' },
+    { label: 'Event Validation', role: 'analytics', summary: 'Validate the event contract', purpose: 'Validate event identity, timestamps, camera, track and zone before persistence or publishing. The real pipeline output format is not confirmed.', output: 'Validated event', dependencies: ['Backend schema adapter', 'Confirmed event contract'], status: 'Planned' },
+    { ...logging, label: 'JSON Event', output: 'JSON event' }, mqtt,
+    { label: 'MQTT Broker', role: 'output', summary: 'Optional external message transport', purpose: 'Route messages to subscribers with configured QoS and optional trusted TLS. Broker operation and QoS settings are unverified.', output: 'Delivered message', dependencies: ['Broker endpoint', 'Trusted certificates if TLS enabled'], status: 'Planned', optional: true },
+    { label: 'Subscriber / Alert / Dashboard', role: 'output', summary: 'Optional notification consumer', purpose: 'Consume events outside the inference path. Dashboard integration uses the backend, never a direct browser MQTT connection.', output: 'Notification', dependencies: ['Backend subscriber', 'Notification integration'], status: 'Planned', optional: true },
+  ], ['JSON incident logging persists when MQTT is disabled or disconnected.', 'Reconnect handling and delivery failures belong in the backend publisher; QoS 1 is a proposal, not an observed setting.']),
+  sequence('modules', 'Software Module Architecture', 'Separate frontend presentation, edge inference, event processing and optional delivery.', [
+    { ...video, label: 'Video-Input Adapter' }, { ...pipegen, label: 'PipeGen Integration' }, { ...runtime, label: 'Inference Adapter' },
+    { ...safety, label: 'Restricted-Zone Engine' }, { ...safety, label: 'Event Processor', output: 'Validated incidents' }, { ...logging, label: 'Incident Logger' }, frontend, { ...mqtt, label: 'MQTT Adapter' },
+    { label: 'Configuration & Health Monitoring', role: 'analytics', summary: 'Configuration and reported diagnostics', purpose: 'Control source/runtime settings and expose only diagnostics measured by the pipeline. Existing settings and health pages are frontend presentation, not verified runtime control.', output: 'Configuration / diagnostics', dependencies: ['External health endpoint', 'Runtime diagnostics'], status: 'Planned' },
+  ], ['Real-time path: video adapter → inference → zone engine → event processor.', 'Persistence, dashboard and optional MQTT are independent reporting/delivery branches. Configuration and health is a control path, not a serial inference stage.']),
 ];
-// Branches replace misleading serial connections for reporting and control paths.
-const overall = architectureDiagrams[0];
-if (overall) {
-  overall.nodes.push({ id: 'database', label: 'Central Database', role: 'storage', detail: 'Planned persistent incident store; the dashboard currently uses demo data or the proposed external backend.', x: 340, y: 345, status: 'Planned' }, { id: 'reporting', label: 'Reporting Engine', role: 'output', detail: 'Aggregate persisted incident records for reporting.', x: 650, y: 345, status: 'Planned' }, { id: 'notifications', label: 'Notifications / Incidents', role: 'output', detail: 'Actionable output from the alerting engine.', x: 30, y: 345, status: 'Planned' });
-  overall.edges.push({ from: 'overall-4', to: 'database' }, { from: 'database', to: 'reporting' }, { from: 'overall-5', to: 'notifications' }); overall.height = 490;
+const overall = architectureDiagrams.find(d => d.id === 'overall');
+if (overall) overall.edges = overall.edges.filter(e => e.to !== 'overall-8').concat({ from: 'overall-6', to: 'overall-8', label: 'Optional event delivery', optional: true });
+const mqttDiagram = architectureDiagrams.find(d => d.id === 'mqtt');
+if (mqttDiagram) {
+  mqttDiagram.nodes.push({ ...mqttDiagram.nodes[3], id: 'json-independent', label: 'JSON Incident Logging', role: 'storage', summary: 'Independent of MQTT availability', detail: logging.purpose, status: 'Planned', external: true, optional: false, x: 660, y: 750, inputs: ['JSON event'], outputs: ['Persistent incident log'], dependencies: logging.dependencies });
+  mqttDiagram.edges.push({ from: 'mqtt-3', to: 'json-independent', label: 'Persist independently' });
 }
-const pipegen = architectureDiagrams[1];
-if (pipegen) {
-  pipegen.boundaries = [{ label: 'COMPILATION · PipeGen v0.5.1 + TensorRT', x: 15, y: 22, width: 930, height: 280 }];
-  pipegen.nodes.forEach((node, i) => { if (i >= 5) { node.x = 30 + (i - 5) * 310; node.y = 345; } });
-  pipegen.nodes.push({ id: 'runtime-video', label: 'Input Video / Config', role: 'input', detail: 'Input video and generated pipeline configuration feed runtime execution.', x: 30, y: 490, status: 'Planned' });
-  pipegen.edges.push({ from: 'runtime-video', to: 'pipegen-5', control: true });
-  pipegen.height = 635;
-}
-const deploy = architectureDiagrams[4];
-if (deploy) {
-  deploy.boundaries = [{ label: 'WINDOWS HOST → WSL2 → GPU CONTAINER (TARGET)', x: 15, y: 22, width: 930, height: 430 }];
-  deploy.nodes.push({ id: 'local-artifacts', label: 'Test Video / Config / Logs', role: 'input', detail: 'Local video and configuration enter the runtime; generated logs provide verification evidence.', x: 340, y: 490, status: 'Planned' });
-  deploy.edges.push({ from: 'local-artifacts', to: 'deployment-7', control: true }); deploy.height = 635;
-}
-const mqtt = architectureDiagrams[5];
-if (mqtt) {
-  mqtt.nodes.push({ id: 'json-independent', label: 'JSON Incident Logging', role: 'storage', detail: 'Local JSON persistence is independent of optional MQTT publishing.', x: 30, y: 200, status: 'Planned' });
-  mqtt.edges.push({ from: 'mqtt-0', to: 'json-independent' });
-}
-const modules = architectureDiagrams[6];
-if (modules) {
-  modules.edges = modules.edges.filter(e => e.to !== 'modules-9' && e.to !== 'modules-10');
-  modules.edges.push({ from: 'modules-6', to: 'modules-9', optional: true }, { from: 'modules-10', to: 'modules-7', control: true });
-}
-export const sampleEvent = { event_id: 'SAMPLE-ZONE-0001', event_type: 'restricted_zone_entry', timestamp: '2026-10-18T07:00:00Z', camera_id: 'SAMPLE-CAMERA-01', track_id: 42, zone_id: 'SAMPLE-ZONE-A', confidence: 0.94, evidence_path: null, severity: 'high' };
+const modules = architectureDiagrams.find(d => d.id === 'modules');
+if (modules) modules.edges = modules.edges.filter(e => e.to !== 'modules-7' && e.to !== 'modules-8').concat({ from: 'modules-4', to: 'modules-7', label: 'Optional publish', optional: true }, { from: 'modules-8', to: 'modules-2', label: 'Runtime configuration', control: true }, { from: 'modules-2', to: 'modules-8', label: 'Reported diagnostics', control: true });
+export const sampleEvent = { event_id: 'SAMPLE-ZONE-0001', event_type: 'restricted_zone_entry', timestamp: '2026-10-18T07:00:00Z', camera_id: 'SAMPLE-CAMERA-01', track_id: 42, zone_id: 'SAMPLE-ZONE-A', confidence: null, evidence_path: null, severity: 'high' };
