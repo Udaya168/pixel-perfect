@@ -16,4 +16,4 @@
 - Never display a measured value (FPS, latency, GPU, accuracy) unless the backend reported it — demo mode leaves them null.
 - Backend contract is documented in `INTEGRATION.md`; update it with any endpoint change.
 - Shared page hierarchy and operational surfaces are owned by global semantic tokens, AppShell, and common presentation components — keeps all monitoring pages visually consistent without changing data logic.
-- Architecture documentation uses typed diagram definitions and a shared React SVG renderer, separate from operational data hooks — keeps diagrams maintainable without implying live pipeline execution.
+- Architecture exploration uses structured diagram data and a shared React Flow viewer with node details, separate from operational data hooks — keeps pan/zoom and export maintainable without implying live pipeline execution.

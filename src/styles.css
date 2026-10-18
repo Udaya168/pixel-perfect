@@ -1,6 +1,7 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@import "@xyflow/react/dist/style.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -162,3 +163,30 @@
 .architecture-boundary { fill: none; stroke: var(--border); stroke-width: 1.5; }
 .architecture-boundary-label { fill: var(--muted-foreground); font-family: var(--font-mono); font-size: 10px; }
 .architecture-legend-dot { background: var(--node-color); }
+
+.architecture-explorer { display: grid; grid-template-columns: 235px minmax(0, 1fr); gap: 20px; }
+.architecture-navigation { min-width: 0; padding: 12px 0; }
+.architecture-diagram-list { display: flex; flex-direction: column; gap: 5px; }
+.architecture-nav-item { width: 100%; height: auto; min-height: 64px; justify-content: flex-start; align-items: flex-start; padding: 12px; white-space: normal; }
+.architecture-nav-item.is-active { color: var(--primary); background: var(--sidebar-accent); box-shadow: inset 2px 0 var(--primary); }
+.architecture-workspace { min-width: 0; display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--panel); }
+.architecture-canvas { position: relative; height: clamp(400px, calc(100dvh - 310px), 900px); min-height: 400px; }
+.architecture-flow-node { width: 265px; min-height: 172px; padding: 16px; border: 1px solid var(--border); border-top: 2px solid var(--node-color); border-radius: var(--radius); background: var(--card); color: var(--foreground); }
+.architecture-flow-node.is-selected { outline: 2px solid var(--primary); outline-offset: 3px; }
+.architecture-flow-node.is-optional { border-style: dashed; }
+.architecture-node-icon { color: var(--node-color); }
+.architecture-status { display: inline-flex; align-items: center; border: 1px solid currentColor; border-radius: 3px; padding: 2px 5px; font-size: 10px; line-height: 1.4; }
+.architecture-status-implemented { color: var(--success); }
+.architecture-status-planned { color: var(--architecture-input); }
+.architecture-status-unverified { color: var(--warning); }
+.architecture-status-external { color: var(--muted-foreground); }
+.architecture-canvas-toolbar { position: absolute; z-index: 5; bottom: 16px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; padding: 4px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--popover); max-width: calc(100% - 20px); }
+.architecture-inspector { position: absolute; z-index: 10; right: 0; top: 0; bottom: 0; width: min(330px, 90%); overflow-y: auto; background: var(--popover); border-left: 1px solid var(--border); }
+.architecture-details-list { height: clamp(400px, calc(100dvh - 310px), 900px); overflow-y: auto; }
+.architecture-fullscreen { position: fixed; inset: 0; z-index: 50; border-radius: 0; }
+.architecture-fullscreen .architecture-canvas, .architecture-fullscreen .architecture-details-list { flex: 1; height: auto; min-height: 0; }
+.architecture-workspace .react-flow { --xy-background-color: var(--panel); --xy-background-pattern-dots-color: var(--border); --xy-edge-stroke: var(--muted-foreground); --xy-edge-stroke-selected: var(--primary); --xy-edge-label-background-color: var(--panel); --xy-edge-label-color: var(--muted-foreground); --xy-handle-background-color: var(--muted-foreground); --xy-handle-border-color: var(--card); --xy-arrowhead-color: var(--muted-foreground); }
+.architecture-workspace .react-flow__edge-text { font-size: 10px; }
+.architecture-flow-dashed .react-flow__edge-path { stroke-dasharray: 5 4; }
+@media (max-width: 1050px) { .architecture-explorer { grid-template-columns: 195px minmax(0, 1fr); gap: 12px; } }
+@media (max-width: 700px) { .architecture-explorer { grid-template-columns: minmax(0, 1fr); } .architecture-navigation { padding: 0; } .architecture-diagram-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); max-height: 190px; overflow-y: auto; } .architecture-navigation > p { display: none; } .architecture-nav-item { min-height: 70px; } .architecture-canvas-toolbar { gap: 0; } .architecture-canvas-toolbar button { padding: 4px; min-width: 28px; width: auto; } .architecture-canvas-toolbar > span { margin: 0 2px; } }
