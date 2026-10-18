@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend } from "recharts";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,8 @@ function Analytics() {
   const [range, setRange] = useState<Range>("7d");
   const [cf, setCf] = useState("");
   const [ct, setCt] = useState("");
+  const [datesReady, setDatesReady] = useState(false);
+  useEffect(() => setDatesReady(true), []);
   const now = Date.now();
   const to = range === "custom" && ct ? Date.parse(ct) + 86400e3 : now;
   const from = range === "custom" ? (cf ? Date.parse(cf) : now - RANGE_MS["7d"]) : now - RANGE_MS[range];
@@ -41,7 +43,7 @@ function Analytics() {
     <div className="space-y-4">
       <PageHeader
         title="Safety Analytics"
-        subtitle={`n = ${list.length} incidents · ${new Date(from).toLocaleString()} → ${new Date(to).toLocaleString()}${mode === "demo" ? " · SAMPLE DATA" : ""}`}
+        subtitle={`n = ${list.length} incidents${datesReady ? ` · ${new Date(from).toLocaleString()} → ${new Date(to).toLocaleString()}` : ""}${mode === "demo" ? " · SAMPLE DATA" : ""}`}
         actions={
           <div className="flex flex-wrap items-center gap-2">
             {(["1h", "24h", "7d", "custom"] as Range[]).map((r) => (
