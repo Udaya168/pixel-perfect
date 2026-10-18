@@ -5,6 +5,6 @@
 
 # System architecture
 - [x] Save a checkpoint of the current implementation.
-- [ ] Add seven maintainable diagrams, technical details and honest implementation status.
-- [ ] Add Architecture navigation and connections to existing pages.
-- [ ] Verify diagrams, controls, page metadata, existing navigation and responsive layouts.
+- [x] Add seven maintainable diagrams, technical details and honest implementation status.
+- [x] Add Architecture navigation and connections to existing pages.
+- [x] Verify diagrams, controls, page metadata, existing navigation and responsive layouts.
