@@ -8,3 +8,10 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+# Architecture rules
+- All data access goes through hooks in `src/hooks/use-data.tsx`, which switch between `src/mocks/` (demo) and `src/services/backend.ts` (live) — keeps demo and real records strictly separated.
+- Backend payloads are validated with zod schemas in `src/types/` — the real pipeline output format is unverified.
+- The browser never runs detection or talks to MQTT directly; it only renders backend-provided streams/metadata — perception lives in the PipeGen/TensorRT/DeepStream pipeline.
+- Never display a measured value (FPS, latency, GPU, accuracy) unless the backend reported it — demo mode leaves them null.
+- Backend contract is documented in `INTEGRATION.md`; update it with any endpoint change.
