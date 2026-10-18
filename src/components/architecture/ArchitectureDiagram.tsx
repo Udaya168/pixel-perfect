@@ -1,87 +1,71 @@
-import { useId, useRef, useState } from 'react';
-import { Download, Maximize2, RotateCcw, ZoomIn, ZoomOut } from 'lucide-react';
+import { useMemo, useRef, useState, useEffect } from 'react';
+import { ReactFlow, Background, Handle, Position, MarkerType, getNodesBounds, getViewportForBounds, type Node, type NodeProps, type ReactFlowInstance } from '@xyflow/react';
+import { Camera, Cpu, ScanLine, Database, Radio, Download, Maximize2, Minimize2, RotateCcw, ZoomIn, ZoomOut, Scan, Network, List, LoaderCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
+import { NodeDetails, StatusBadge } from './NodeDetails';
 import type { ArchitectureDiagram as DiagramData, ArchitectureNode } from './architecture-data';
-
-const nodeWidth = 260;
-const nodeHeight = 98;
-function labelLines(label: string) {
-  const lines: string[] = [];
-  for (const word of label.split(' ')) {
-    const last = lines.at(-1);
-    if (last && (last + ' ' + word).length <= 27) lines[lines.length - 1] = last + ' ' + word;
-    else lines.push(word);
-  }
-  return lines;
-}
-function connector(from: ArchitectureNode, to: ArchitectureNode) {
-  if (from.y === to.y) {
-    const right = to.x > from.x;
-    return `M ${from.x + (right ? nodeWidth : 0)} ${from.y + 49} H ${to.x + (right ? 0 : nodeWidth)}`;
-  }
-  const down = to.y > from.y;
-  const sx = from.x + nodeWidth / 2, sy = from.y + (down ? nodeHeight : 0);
-  const tx = to.x + nodeWidth / 2, ty = to.y + (down ? 0 : nodeHeight);
-  const mid = (sy + ty) / 2;
-  return `M ${sx} ${sy} V ${mid} H ${tx} V ${ty}`;
-}
-export function ArchitectureDiagram({ diagram }: { diagram: DiagramData }) {
-  const [zoom, setZoom] = useState(1);
-  const [expanded, setExpanded] = useState(false);
-  const ref = useRef<SVGSVGElement>(null);
-  const marker = useId().replace(/:/g, '');
-  function download() {
-    const source = ref.current;
-    if (!source) return;
-    const clone = source.cloneNode(true) as SVGSVGElement;
-    const originals = [source, ...Array.from(source.querySelectorAll('*'))];
-    const copies = [clone, ...Array.from(clone.querySelectorAll('*'))];
-    originals.forEach((element, i) => {
-      const copy = copies[i];
-      if (!copy) return;
-      const computed = getComputedStyle(element);
-      for (const key of ['fill', 'stroke', 'color', 'font-family', 'font-size', 'font-weight', 'stroke-dasharray', 'stroke-width']) copy.setAttribute(key, computed.getPropertyValue(key));
-    });
-    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-    clone.setAttribute('width', '960'); clone.setAttribute('height', String(diagram.height));
-    const url = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(clone)], { type: 'image/svg+xml' }));
-    const a = document.createElement('a'); a.href = url; a.download = `safety-sentinel-${diagram.id}.svg`; a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  }
-  const canvas = (large = false) => <div className="architecture-scroll overflow-auto" tabIndex={0} aria-label={`${diagram.title} diagram canvas`}>
-    <svg ref={large ? undefined : ref} viewBox={`0 0 960 ${diagram.height}`} className={`architecture-svg architecture-zoom-${Math.round(zoom * 100)}`} role="img" aria-label={`${diagram.title}: intended architecture, not verified end to end`}>
-      <title>{diagram.title}</title>
-      <defs><marker id={`${marker}-${large ? 'large' : 'inline'}`} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" className="architecture-arrow" /></marker></defs>
-      <rect width="960" height={diagram.height} className="architecture-background" />
-      {diagram.boundaries?.map(b => <g key={b.label}><rect x={b.x} y={b.y} width={b.width} height={b.height} rx="6" className="architecture-boundary" /><text x={b.x + 14} y={b.y + 20} className="architecture-boundary-label">{b.label}</text></g>)}
-      {diagram.edges.map((edge, i) => {
-        const from = diagram.nodes.find(n => n.id === edge.from), to = diagram.nodes.find(n => n.id === edge.to);
-        if (!from || !to) return null;
-        return <path key={i} d={connector(from, to)} className={`architecture-edge ${edge.control ? 'architecture-control' : ''} ${edge.optional ? 'architecture-optional-edge' : ''}`} markerEnd={`url(#${marker}-${large ? 'large' : 'inline'})`} />;
-      })}
-      {diagram.nodes.map(node => <g key={node.id} className={`architecture-node architecture-role-${node.role} ${node.optional ? 'architecture-optional' : ''}`}><title>{`${node.detail} Status: ${node.status}.`}</title>
-        <rect x={node.x} y={node.y} width={nodeWidth} height={nodeHeight} rx="6" />
-        <rect x={node.x} y={node.y + 12} width="3" height="74" className="architecture-node-accent" />
-        <text x={node.x + 16} y={node.y + 21} className="architecture-node-category">{node.role.toUpperCase()}{node.optional ? ' · OPTIONAL' : ''}</text>
-        <text x={node.x + 16} y={node.y + 46} className="architecture-node-label">{labelLines(node.label).map((line, i) => <tspan key={line} x={node.x + 16} dy={i === 0 ? 0 : 19}>{line}</tspan>)}</text>
-        <text x={node.x + 16} y={node.y + 86} className="architecture-node-status">{node.status}</text>
-      </g>)}
-    </svg>
+type FlowNode = Node<{ component: ArchitectureNode }, 'component'>;
+const icons = { input: Camera, inference: Cpu, analytics: ScanLine, storage: Database, output: Radio };
+function ComponentNode({ data, selected }: NodeProps<FlowNode>) {
+  const node = data.component;
+  const Icon = icons[node.role];
+  return <div className={`architecture-flow-node architecture-role-${node.role} ${selected ? 'is-selected' : ''} ${node.optional ? 'is-optional' : ''}`}>
+    <Handle type="target" position={Position.Top} /><Handle type="source" position={Position.Bottom} />
+    <div className="mb-3 flex items-center justify-between"><Icon className="h-5 w-5 architecture-node-icon" /><span className="font-mono text-[10px] uppercase text-muted-foreground">{node.role}</span></div>
+    <h3 className="mb-2 text-sm font-semibold">{node.label}</h3><p className="mb-3 text-xs leading-relaxed text-muted-foreground">{node.summary}</p>
+    <div className="flex items-center gap-2"><StatusBadge node={node} />{node.external && <span className="text-[10px] text-muted-foreground">External</span>}</div>
   </div>;
-  return <div className="min-w-0">
-    <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-      <span className="font-mono text-[10px] uppercase text-muted-foreground">Intended architecture · end-to-end unverified</span>
-      <div className="flex items-center gap-1">
-        <Button size="icon" variant="ghost" title="Zoom out" aria-label={`Zoom out ${diagram.title}`} disabled={zoom <= 0.75} onClick={() => setZoom(z => Math.max(0.75, z - 0.25))}><ZoomOut /></Button>
-        <span className="w-10 text-center font-mono text-xs text-muted-foreground">{Math.round(zoom * 100)}%</span>
-        <Button size="icon" variant="ghost" title="Zoom in" aria-label={`Zoom in ${diagram.title}`} disabled={zoom >= 1.5} onClick={() => setZoom(z => Math.min(1.5, z + 0.25))}><ZoomIn /></Button>
-        <Button size="icon" variant="ghost" title="Reset zoom" aria-label={`Reset zoom ${diagram.title}`} onClick={() => setZoom(1)}><RotateCcw /></Button>
-        <Button size="icon" variant="ghost" title="Fullscreen view" aria-label={`Expand ${diagram.title}`} onClick={() => setExpanded(true)}><Maximize2 /></Button>
-        <Button size="icon" variant="outline" title="Download SVG diagram" aria-label={`Download ${diagram.title}`} onClick={download}><Download /></Button>
+}
+const nodeTypes = { component: ComponentNode };
+export function ArchitectureDiagram({ diagram }: { diagram: DiagramData }) {
+  const [instance, setInstance] = useState<ReactFlowInstance<FlowNode> | null>(null);
+  const [zoom, setZoom] = useState(1);
+  const [selected, setSelected] = useState<ArchitectureNode | null>(null);
+  const [view, setView] = useState<'diagram' | 'details'>('diagram');
+  const [fullscreen, setFullscreen] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [error, setError] = useState('');
+  const workspace = useRef<HTMLDivElement>(null);
+  const nodes = useMemo<FlowNode[]>(() => diagram.nodes.map(node => ({ id: node.id, type: 'component', position: { x: node.x, y: node.y }, data: { component: node }, ariaLabel: `${node.label} component`, focusable: true })), [diagram]);
+  const edges = useMemo(() => diagram.edges.map((edge, i) => ({ id: `${diagram.id}-edge-${i}`, source: edge.from, target: edge.to, label: edge.label, type: 'smoothstep', markerEnd: { type: MarkerType.ArrowClosed }, className: edge.optional || edge.control ? 'architecture-flow-dashed' : undefined })), [diagram]);
+  useEffect(() => {
+    const close = (event: KeyboardEvent) => { if (event.key === 'Escape') setFullscreen(false); };
+    document.addEventListener('keydown', close);
+    return () => document.removeEventListener('keydown', close);
+  }, []);
+  useEffect(() => { const timer = setTimeout(() => { void instance?.fitView({ padding: 0.16 }); }, 80); return () => clearTimeout(timer); }, [fullscreen, instance, view]);
+  async function download(format: 'png' | 'svg') {
+    const viewport = workspace.current?.querySelector<HTMLElement>('.react-flow__viewport');
+    if (!viewport || !instance) return;
+    setExporting(true); setError('');
+    try {
+      const { toPng, toSvg } = await import('html-to-image');
+      const bounds = getNodesBounds(instance.getNodes());
+      const width = 1600, height = Math.max(900, Math.ceil((bounds.height / bounds.width) * width));
+      const fit = getViewportForBounds(bounds, width, height, 0.1, 2, 0.15);
+      const backgroundColor = getComputedStyle(workspace.current ?? viewport).getPropertyValue('--panel').trim();
+      const url = await (format === 'png' ? toPng : toSvg)(viewport, { backgroundColor, width, height, pixelRatio: 1, style: { width: `${width}px`, height: `${height}px`, transform: `translate(${fit.x}px, ${fit.y}px) scale(${fit.zoom})` } });
+      const link = document.createElement('a'); link.download = `safety-sentinel-${diagram.id}.${format}`; link.href = url; link.click();
+    } catch { setError('Export failed. Please try again.'); } finally { setExporting(false); }
+  }
+  return <div ref={workspace} className={`architecture-workspace ${fullscreen ? 'architecture-fullscreen' : ''}`}>
+    <header className="flex flex-wrap items-center justify-between gap-3 border-b bg-panel px-4 py-3">
+      <div className="min-w-0"><h2 className="text-sm font-semibold">{diagram.title}</h2><p className="mt-1 font-mono text-[10px] text-muted-foreground">{diagram.nodes.length} components · {diagram.edges.length} connections</p></div>
+      <div className="flex items-center gap-1" aria-label="Architecture view"><Button size="sm" variant={view === 'diagram' ? 'secondary' : 'ghost'} aria-pressed={view === 'diagram'} onClick={() => { setView('diagram'); setSelected(null); }}><Network />Diagram View</Button><Button size="sm" variant={view === 'details' ? 'secondary' : 'ghost'} aria-pressed={view === 'details'} onClick={() => { setView('details'); setSelected(null); }}><List />Details View</Button></div>
+    </header>
+    {view === 'diagram' ? <div className="architecture-canvas" aria-label={`${diagram.title} diagram canvas`}>
+      <ReactFlow<FlowNode> nodes={nodes} edges={edges} nodeTypes={nodeTypes} onInit={setInstance} onMove={(_, viewport) => setZoom(viewport.zoom)} onNodeClick={(_, node) => setSelected(node.data.component)} onNodeDoubleClick={(_, node) => { void instance?.fitView({ nodes: [{ id: node.id }], padding: 0.5, maxZoom: 1.4 }); }} onPaneClick={() => setSelected(null)} nodesDraggable={false} nodesConnectable={false} minZoom={0.15} maxZoom={2.5} fitView fitViewOptions={{ padding: 0.16 }} colorMode="dark" proOptions={{ hideAttribution: true }}><Background gap={24} size={1} /></ReactFlow>
+      <div className="architecture-canvas-toolbar" aria-label="Diagram controls">
+        <Button size="icon" variant="ghost" title="Zoom out" aria-label="Zoom out" onClick={() => { void instance?.zoomOut(); }}><ZoomOut /></Button><output aria-label="Zoom level" className="w-11 text-center font-mono text-[10px] text-muted-foreground">{Math.round(zoom * 100)}%</output>
+        <Button size="icon" variant="ghost" title="Zoom in" aria-label="Zoom in" onClick={() => { void instance?.zoomIn(); }}><ZoomIn /></Button>
+        <span className="mx-1 h-5 border-l" /><Button size="icon" variant="ghost" title="Fit to screen" aria-label="Fit to screen" onClick={() => { void instance?.fitView({ padding: 0.16 }); }}><Scan /></Button>
+        <Button size="icon" variant="ghost" title="Reset view" aria-label="Reset view" onClick={() => { setSelected(null); void instance?.fitView({ padding: 0.16 }); }}><RotateCcw /></Button>
+        <Button size="icon" variant="ghost" title={fullscreen ? 'Exit fullscreen' : 'Fullscreen'} aria-label={fullscreen ? 'Exit fullscreen' : 'Fullscreen'} onClick={() => setFullscreen(value => !value)}>{fullscreen ? <Minimize2 /> : <Maximize2 />}</Button>
+        <span className="mx-1 h-5 border-l" /><Button size="sm" variant="ghost" aria-label="Export PNG" title="Export PNG" disabled={exporting} onClick={() => { void download('png'); }}>{exporting ? <LoaderCircle className="animate-spin" /> : <Download />}PNG</Button><Button size="sm" variant="ghost" aria-label="Export SVG" title="Export SVG" disabled={exporting} onClick={() => { void download('svg'); }}>SVG</Button>
       </div>
-    </div>
-    {canvas()}
-    <Dialog open={expanded} onOpenChange={setExpanded}><DialogContent className="h-[90dvh] max-w-[96vw] grid-rows-[auto_auto_1fr] overflow-hidden"><DialogTitle className="pr-6">{diagram.title}</DialogTitle><DialogDescription>Intended architecture · external pipeline operation is unverified.</DialogDescription>{canvas(true)}</DialogContent></Dialog>
+      {selected && <aside className="architecture-inspector"><NodeDetails node={selected} onClose={() => setSelected(null)} /></aside>}
+      {error && <p role="alert" className="absolute bottom-16 left-4 text-xs text-critical">{error}</p>}
+    </div> : <div className="architecture-details-list"><p className="border-b px-5 py-4 text-sm leading-relaxed text-muted-foreground">{diagram.description}</p><div className="grid divide-y lg:grid-cols-2">{diagram.nodes.map(node => <NodeDetails key={node.id} node={node} />)}</div><div className="space-y-2 border-t p-5 text-sm text-muted-foreground">{diagram.details.map(detail => <p key={detail}>{detail}</p>)}</div>{fullscreen && <Button className="m-4" variant="outline" onClick={() => setFullscreen(false)}><Minimize2 />Exit fullscreen</Button>}</div>}
+    <footer className="flex flex-wrap gap-x-4 gap-y-2 border-t bg-panel px-4 py-3 text-[10px] text-muted-foreground" aria-label="Implementation status legend"><span className="architecture-status-implemented">● Implemented</span><span className="architecture-status-planned">● Planned</span><span className="architecture-status-unverified">● Unverified</span><span className="architecture-status-external">◇ External component</span><span>→ Data flow</span><span>⇢ Optional / control</span></footer>
   </div>;
 }

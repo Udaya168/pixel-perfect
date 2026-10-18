@@ -1,57 +1,34 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
-import { ArrowRight, GitBranch, Cpu, ChevronDown, ExternalLink, FileJson, ShieldCheck } from 'lucide-react';
+import { useState } from 'react';
+import { createFileRoute } from '@tanstack/react-router';
+import { Search, GitBranch, ChevronRight, Cpu } from 'lucide-react';
 import { PageHeader, Pill } from '@/components/common';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { ArchitectureDiagram } from '@/components/architecture/ArchitectureDiagram';
-import { architectureDiagrams, sampleEvent } from '@/components/architecture/architecture-data';
+import { architectureDiagrams } from '@/components/architecture/architecture-data';
 import { pageHead } from '@/lib/seo';
-
 export const Route = createFileRoute('/architecture')({
-  head: pageHead('System Architecture', 'Seven intended architecture diagrams for the Workplace Safety Sentinel PipeGen, TensorRT and DeepStream edge pipeline.'),
+  head: pageHead('Architecture Explorer', 'Explore seven interactive Workplace Safety Sentinel architecture diagrams with component details for the intended PipeGen v0.5.1, TensorRT and DeepStream pipeline.'),
   component: ArchitecturePage,
 });
-const relatedPages = [
-  { to: '/dashboard', label: 'Overview' }, { to: '/monitoring', label: 'Live Monitoring' }, { to: '/incidents', label: 'Incident Centre' },
-  { to: '/zones', label: 'Hazard Zones' }, { to: '/ppe', label: 'PPE Monitoring' }, { to: '/analytics', label: 'Safety Analytics' },
-  { to: '/system-health', label: 'System Health' }, { to: '/evidence', label: 'Evidence & Reports' }, { to: '/settings', label: 'Settings' },
-] as const;
 function ArchitecturePage() {
-  return <div className="space-y-8">
-    <PageHeader title="System Architecture" subtitle="Workplace Safety Sentinel · Track A — PipeGen (Perception)" actions={<Pill tone="warn" dot>Intended · pipeline unverified</Pill>} />
-    <section className="space-y-5 border-t pt-5">
-      <div className="flex items-center gap-2 text-primary"><GitBranch className="h-5 w-5" /><h2 className="text-lg font-semibold text-foreground">Workplace Safety Sentinel</h2></div>
-      <p className="max-w-3xl text-sm text-muted-foreground">Edge vision pipeline that produces actionable workplace-safety events.</p>
-      <dl className="grid gap-x-8 gap-y-4 text-sm sm:grid-cols-2 xl:grid-cols-4">
-        {[
-          ['Target hardware', 'NVIDIA RTX 3050 · 4 GB VRAM'], ['Runtime target', 'PipeGen v0.5.1 / TensorRT / DeepStream'],
-          ['Primary MVP', 'Restricted-zone entry detection'], ['Input', 'Repeatable local test video'],
-        ].map(([term, value]) => <div key={term}><dt className="mb-1 text-xs text-muted-foreground">{term}</dt><dd className="font-medium">{value}</dd></div>)}
-      </dl>
-      <div className="flex flex-wrap items-center gap-3 border-y py-5 text-sm font-medium">
-        <span>Video Input</span><ArrowRight className="h-4 w-4 text-muted-foreground" /><span className="text-primary">PipeGen / TensorRT / DeepStream Inference</span><ArrowRight className="h-4 w-4 text-muted-foreground" /><span>Safety Analytics</span><ArrowRight className="h-4 w-4 text-muted-foreground" /><span className="text-warning">Incident Output</span>
-      </div>
-      <p className="text-xs text-muted-foreground">Intended output: timestamped JSON incident events and dashboard-visible incident records. No end-to-end pipeline verification is available.</p>
-      <div className="grid gap-5 sm:grid-cols-2">
-        <div className="flex gap-3"><ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" /><div className="text-sm"><h3 className="font-medium">Existing frontend</h3><p className="mt-1 text-xs leading-relaxed text-muted-foreground">Dashboard pages, demo records, zone editing and proposed backend adapters are implemented. Demo behavior is not proof of inference.</p></div></div>
-        <div className="flex gap-3"><Cpu className="mt-0.5 h-4 w-4 shrink-0 text-warning" /><div className="text-sm"><h3 className="font-medium">External pipeline · Planned</h3><p className="mt-1 text-xs leading-relaxed text-muted-foreground">Installation, model classes, engine compilation, runtime execution and MQTT operation have no supplied verification evidence.</p></div></div>
-      </div>
-    </section>
-    <nav aria-label="Architecture sections" className="flex flex-wrap gap-x-5 gap-y-3 border-t pt-4">
-      {architectureDiagrams.map((diagram, i) => <a key={diagram.id} href={`#architecture-${diagram.id}`} className="text-xs text-muted-foreground hover:text-primary"><span className="mr-1.5 font-mono text-primary">0{i + 1}</span>{diagram.title}</a>)}
-    </nav>
-    <section aria-label="Diagram legend" className="flex flex-wrap gap-x-6 gap-y-3 text-xs text-muted-foreground">
-      {(['input', 'inference', 'analytics', 'storage', 'output'] as const).map(role => <span key={role} className={`architecture-role-${role} flex items-center gap-2 capitalize`}><span className="architecture-legend-dot h-2 w-2 rounded-sm" />{role}</span>)}
-      <span>→ Data flow</span><span className="border-b border-dashed pb-1">⇢ Control flow</span><span className="border border-dashed px-2 py-0.5">Optional component / transport</span><span className="border px-2 py-0.5">Deployment / compilation boundary</span>
-    </section>
-    {architectureDiagrams.map((diagram, i) => <section key={diagram.id} id={`architecture-${diagram.id}`} className="scroll-mt-24 border-t pt-6">
-      <header className="mb-5 flex items-start gap-4"><span className="pt-1 font-mono text-sm text-primary">0{i + 1}</span><div><h2 className="text-xl font-semibold">{diagram.title}</h2><p className="mt-2 max-w-3xl text-sm leading-relaxed text-muted-foreground">{diagram.description}</p></div></header>
-      <ArchitectureDiagram diagram={diagram} />
-      <details className="group mt-4 border-y py-3"><summary className="flex cursor-pointer list-none items-center justify-between text-sm font-medium">Technical details & component notes<ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" /></summary><div className="mt-4 space-y-4 text-sm leading-relaxed text-muted-foreground">
-        {diagram.details.map(detail => <p key={detail}>{detail}</p>)}
-        <dl className="grid gap-x-8 gap-y-3 sm:grid-cols-2">{diagram.nodes.map(node => <div key={node.id}><dt className="font-medium text-foreground">{node.label} <span className="text-xs font-normal text-muted-foreground">· {node.optional ? 'Optional / Planned' : node.status}</span></dt><dd className="mt-1 text-xs">{node.detail}</dd></div>)}</dl>
-      </div></details>
-      {diagram.id === 'mqtt' && <div className="mt-5"><h3 className="mb-2 flex items-center gap-2 text-sm font-medium"><FileJson className="h-4 w-4 text-warning" />Sample restricted-zone event <Pill tone="warn">Illustrative only</Pill></h3><p className="mb-3 text-xs text-muted-foreground">Proposed payload, not an emitted event or confirmed backend contract. Sample confidence is not a measurement; evidence is unavailable.</p><pre className="overflow-x-auto rounded border bg-panel p-4 font-mono text-xs leading-relaxed text-foreground"><code>{JSON.stringify(sampleEvent, null, 2)}</code></pre></div>}
-    </section>)}
-    <section className="border-t pt-6"><h2 className="mb-4 text-lg font-semibold">Connected dashboard pages</h2><div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{relatedPages.map(page => <Button key={page.to} asChild variant="ghost" className="justify-between"><Link to={page.to}>{page.label}<ExternalLink className="h-4 w-4 text-muted-foreground" /></Link></Button>)}</div></section>
+  const [selectedId, setSelectedId] = useState('overall');
+  const [search, setSearch] = useState('');
+  const selected = architectureDiagrams.find(diagram => diagram.id === selectedId) ?? architectureDiagrams[0];
+  if (!selected) return null;
+  const visible = architectureDiagrams.filter(diagram => `${diagram.title} ${diagram.description}`.toLowerCase().includes(search.toLowerCase()));
+  return <div className="space-y-5">
+    <PageHeader title="System Architecture" subtitle="Workplace Safety Sentinel · Track A — PipeGen (Perception)" actions={<Pill tone="warn" dot>Pipeline unverified</Pill>} />
+    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-y py-3 text-xs text-muted-foreground"><span className="flex items-center gap-2"><Cpu className="h-4 w-4 text-primary" />PipeGen v0.5.1 · TensorRT · DeepStream</span><span>NVIDIA RTX 3050 · 4 GB VRAM</span><span>Frontend: demo/sample data</span></div>
+    <div className="architecture-explorer">
+      <aside className="architecture-navigation" aria-label="Architecture diagrams">
+        <h2 className="mb-4 flex items-center gap-2 text-xs font-semibold"><GitBranch className="h-4 w-4 text-primary" />ARCHITECTURES <span className="ml-auto font-mono text-muted-foreground">07</span></h2>
+        <div className="relative mb-4"><Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" /><Input value={search} onChange={event => setSearch(event.target.value)} aria-label="Search architectures" placeholder="Search architectures…" className="pl-9 text-xs" /></div>
+        <nav className="architecture-diagram-list">{visible.map(diagram => <Button key={diagram.id} variant="ghost" aria-label={`Select ${diagram.title}`} aria-pressed={selectedId === diagram.id} className={`architecture-nav-item ${selectedId === diagram.id ? 'is-active' : ''}`} onClick={() => setSelectedId(diagram.id)}><span className="pt-0.5 font-mono text-[10px] text-muted-foreground">0{architectureDiagrams.indexOf(diagram) + 1}</span><span className="min-w-0 flex-1 text-left"><span className="block text-xs font-medium">{diagram.title}</span><span className="mt-1 block text-[10px] font-normal text-muted-foreground">{diagram.nodes.length} components</span></span><ChevronRight className="h-3.5 w-3.5 shrink-0" /></Button>)}</nav>
+        {visible.length === 0 && <p className="py-3 text-xs text-muted-foreground">No matching architectures.</p>}
+        <p className="mt-6 border-t pt-4 text-[11px] leading-relaxed text-muted-foreground">Intended system design. External installation, compilation and inference have no supplied verification evidence.</p>
+      </aside>
+      <ArchitectureDiagram key={selected.id} diagram={selected} />
+    </div>
   </div>;
 }
