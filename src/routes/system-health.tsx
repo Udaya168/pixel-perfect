@@ -35,7 +35,7 @@ function SystemHealth() {
       <PageHeader
         title="System Health"
         subtitle={`Last successful update: ${fmtTime(s?.last_update)}`}
-        actions={<Button size="sm" variant="outline" onClick={() => { sys.refetch(); health.refetch(); cams.refetch(); }}><RefreshCw className="h-4 w-4" /> Refresh</Button>}
+        actions={<Button size="sm" variant="outline" disabled={sys.isFetching || cams.isFetching || (mode === "live" && health.isFetching)} onClick={() => { sys.refetch(); if (mode === "live") health.refetch(); cams.refetch(); }}><RefreshCw className="h-4 w-4" /> Refresh</Button>}
       />
       {mode === "live" && (
         <Panel title="Backend API">

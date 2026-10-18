@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { backend } from "@/services/backend";
 import { demo } from "@/mocks/demo-data";
@@ -16,11 +16,12 @@ export function DataModeProvider({ children }: { children: ReactNode }) {
     if (saved === "demo" || saved === "live") setModeState(saved);
     else setModeState(config.apiBaseUrl ? "live" : "demo");
   }, []);
-  const setMode = (m: Mode) => {
+  const setMode = useCallback((m: Mode) => {
     localStorage.setItem(KEY, m);
     setModeState(m);
-  };
-  return <ModeCtx.Provider value={{ mode, setMode }}>{children}</ModeCtx.Provider>;
+  }, []);
+  const value = useMemo(() => ({ mode, setMode }), [mode, setMode]);
+  return <ModeCtx.Provider value={value}>{children}</ModeCtx.Provider>;
 }
 
 export const useMode = () => useContext(ModeCtx);
@@ -30,6 +31,7 @@ function useSourced<T>(key: string, demoFn: () => Promise<T>, liveFn: () => Prom
   return useQuery({
     queryKey: [key, mode],
     queryFn: mode === "demo" ? demoFn : liveFn,
+    staleTime: mode === "demo" ? Infinity : config.pollIntervalMs,
     refetchInterval: poll && mode === "live" ? config.pollIntervalMs : false,
     retry: 1,
   });
@@ -48,6 +50,7 @@ export function useApiHealth() {
     queryKey: ["health", mode],
     queryFn: backend.health,
     enabled: mode === "live",
+    staleTime: config.pollIntervalMs,
     refetchInterval: config.pollIntervalMs,
     retry: 0,
   });
