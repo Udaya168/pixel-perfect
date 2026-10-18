@@ -52,7 +52,7 @@ export function ArchitectureDiagram({ diagram }: { diagram: DiagramData }) {
       const color = (token: string) => css.getPropertyValue(token).trim();
       const escape = (value: string) => value.replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' })[character] ?? character);
       const lines = (value: string) => value.split(' ').reduce<string[]>((result, word) => { const last = result.at(-1); if (last && `${last} ${word}`.length <= 30) result[result.length - 1] = `${last} ${word}`; else result.push(word); return result; }, []);
-      const width = Math.ceil(bounds.width + 120), height = Math.ceil(bounds.height + 160);
+      const width = Math.ceil(Math.max(bounds.width, ...diagram.nodes.map(node => node.x + 265)) + 120), height = Math.ceil(Math.max(bounds.height, ...diagram.nodes.map(node => node.y + 172)) + 160);
       const edgeSvg = Array.from(viewport.querySelectorAll('.react-flow__edge')).map(edge => {
         const path = edge.querySelector('path.react-flow__edge-path');
         const label = edge.querySelector('.react-flow__edge-text');

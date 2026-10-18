@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
-  LayoutDashboard, Video, Siren, Hexagon, HardHat, BarChart3, Activity, FileCheck2, Settings, ShieldCheck, ChevronRight, GitBranch,
+  LayoutDashboard, Video, Siren, Hexagon, HardHat, BarChart3, Activity, FileCheck2, Settings, ShieldCheck, ChevronRight,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton,
@@ -19,7 +19,6 @@ const nav = [
   { to: "/analytics", label: "Safety Analytics", icon: BarChart3 },
   { to: "/system-health", label: "System Health", icon: Activity },
   { to: "/evidence", label: "Evidence & Reports", icon: FileCheck2 },
-  { to: "/architecture", label: "Architecture", icon: GitBranch },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 

@@ -10,7 +10,7 @@
 - [x] Verify diagrams, controls, page metadata, existing navigation and responsive layouts.
 
 # Interactive architecture explorer
-- [ ] Remove the Architecture option from the sidebar as requested.
+- [x] Remove the Architecture option from the sidebar as requested.
 - [x] Replace stacked diagrams with searchable selection and an interactive canvas.
 - [x] Add structured node details, accurate status legend, view controls and export.
 - [x] Verify all seven diagrams and interaction controls across desktop and laptop sizes.
