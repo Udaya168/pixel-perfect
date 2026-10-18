@@ -10,12 +10,24 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as EvidenceRouteImport } from './routes/evidence'
 import { Route as IncidentsRouteImport } from './routes/incidents'
+import { Route as MonitoringRouteImport } from './routes/monitoring'
+import { Route as PpeRouteImport } from './routes/ppe'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SystemHealthRouteImport } from './routes/system-health'
+import { Route as ZonesRouteImport } from './routes/zones'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnalyticsRoute = AnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -23,40 +35,129 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EvidenceRoute = EvidenceRouteImport.update({
+  id: '/evidence',
+  path: '/evidence',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IncidentsRoute = IncidentsRouteImport.update({
   id: '/incidents',
   path: '/incidents',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MonitoringRoute = MonitoringRouteImport.update({
+  id: '/monitoring',
+  path: '/monitoring',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PpeRoute = PpeRouteImport.update({
+  id: '/ppe',
+  path: '/ppe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SystemHealthRoute = SystemHealthRouteImport.update({
+  id: '/system-health',
+  path: '/system-health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ZonesRoute = ZonesRouteImport.update({
+  id: '/zones',
+  path: '/zones',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/analytics': typeof AnalyticsRoute
   '/dashboard': typeof DashboardRoute
+  '/evidence': typeof EvidenceRoute
   '/incidents': typeof IncidentsRoute
+  '/monitoring': typeof MonitoringRoute
+  '/ppe': typeof PpeRoute
+  '/settings': typeof SettingsRoute
+  '/system-health': typeof SystemHealthRoute
+  '/zones': typeof ZonesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/analytics': typeof AnalyticsRoute
   '/dashboard': typeof DashboardRoute
+  '/evidence': typeof EvidenceRoute
   '/incidents': typeof IncidentsRoute
+  '/monitoring': typeof MonitoringRoute
+  '/ppe': typeof PpeRoute
+  '/settings': typeof SettingsRoute
+  '/system-health': typeof SystemHealthRoute
+  '/zones': typeof ZonesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/analytics': typeof AnalyticsRoute
   '/dashboard': typeof DashboardRoute
+  '/evidence': typeof EvidenceRoute
   '/incidents': typeof IncidentsRoute
+  '/monitoring': typeof MonitoringRoute
+  '/ppe': typeof PpeRoute
+  '/settings': typeof SettingsRoute
+  '/system-health': typeof SystemHealthRoute
+  '/zones': typeof ZonesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/incidents'
+  fullPaths:
+    | '/'
+    | '/analytics'
+    | '/dashboard'
+    | '/evidence'
+    | '/incidents'
+    | '/monitoring'
+    | '/ppe'
+    | '/settings'
+    | '/system-health'
+    | '/zones'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/incidents'
-  id: '__root__' | '/' | '/dashboard' | '/incidents'
+  to:
+    | '/'
+    | '/analytics'
+    | '/dashboard'
+    | '/evidence'
+    | '/incidents'
+    | '/monitoring'
+    | '/ppe'
+    | '/settings'
+    | '/system-health'
+    | '/zones'
+  id:
+    | '__root__'
+    | '/'
+    | '/analytics'
+    | '/dashboard'
+    | '/evidence'
+    | '/incidents'
+    | '/monitoring'
+    | '/ppe'
+    | '/settings'
+    | '/system-health'
+    | '/zones'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AnalyticsRoute: typeof AnalyticsRoute
   DashboardRoute: typeof DashboardRoute
+  EvidenceRoute: typeof EvidenceRoute
   IncidentsRoute: typeof IncidentsRoute
+  MonitoringRoute: typeof MonitoringRoute
+  PpeRoute: typeof PpeRoute
+  SettingsRoute: typeof SettingsRoute
+  SystemHealthRoute: typeof SystemHealthRoute
+  ZonesRoute: typeof ZonesRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -68,11 +169,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/analytics': {
+      id: '/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/evidence': {
+      id: '/evidence'
+      path: '/evidence'
+      fullPath: '/evidence'
+      preLoaderRoute: typeof EvidenceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/incidents': {
@@ -82,13 +197,55 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IncidentsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/monitoring': {
+      id: '/monitoring'
+      path: '/monitoring'
+      fullPath: '/monitoring'
+      preLoaderRoute: typeof MonitoringRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ppe': {
+      id: '/ppe'
+      path: '/ppe'
+      fullPath: '/ppe'
+      preLoaderRoute: typeof PpeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/system-health': {
+      id: '/system-health'
+      path: '/system-health'
+      fullPath: '/system-health'
+      preLoaderRoute: typeof SystemHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/zones': {
+      id: '/zones'
+      path: '/zones'
+      fullPath: '/zones'
+      preLoaderRoute: typeof ZonesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AnalyticsRoute: AnalyticsRoute,
   DashboardRoute: DashboardRoute,
+  EvidenceRoute: EvidenceRoute,
   IncidentsRoute: IncidentsRoute,
+  MonitoringRoute: MonitoringRoute,
+  PpeRoute: PpeRoute,
+  SettingsRoute: SettingsRoute,
+  SystemHealthRoute: SystemHealthRoute,
+  ZonesRoute: ZonesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
