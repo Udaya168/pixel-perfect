@@ -10,6 +10,8 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Industrial AI safety command centre for PipeGen, TensorRT and DeepStream pipelines." },
       { property: "og:title", content: "Workplace Safety Sentinel" },
       { property: "og:description", content: "Industrial AI safety command centre for edge vision pipelines." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
 });

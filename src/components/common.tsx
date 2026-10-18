@@ -15,7 +15,7 @@ const toneCls: Record<Tone, string> = {
 
 export function Pill({ tone = "muted", children, dot, className }: { tone?: Tone; children: ReactNode; dot?: boolean; className?: string }) {
   return (
-    <span className={cn("inline-flex items-center gap-1.5 rounded border px-2 py-0.5 font-mono text-[11px] font-medium uppercase tracking-wide whitespace-nowrap", toneCls[tone], className)}>
+      <span className={cn("inline-flex max-w-full items-center gap-1.5 rounded border px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-normal", toneCls[tone], className)}>
       {dot && <span className={cn("h-1.5 w-1.5 rounded-full bg-current", tone === "ok" && "glow-active")} />}
       {children}
     </span>
@@ -33,23 +33,23 @@ export function stateTone(s: string | null | undefined): Tone {
 
 export function Panel({ title, action, children, className }: { title?: ReactNode; action?: ReactNode; children: ReactNode; className?: string }) {
   return (
-    <section className={cn("rounded-lg border bg-panel", className)}>
+    <section className={cn("min-w-0 border-t border-border", className)}>
       {(title || action) && (
-        <header className="flex items-center justify-between gap-2 border-b px-4 py-2.5">
-          <h2 className="panel-title">{title}</h2>
+        <header className="flex flex-wrap items-center justify-between gap-2 py-4">
+          <h2 className="text-sm font-semibold">{title}</h2>
           {action}
         </header>
       )}
-      <div className="p-4">{children}</div>
+      <div className="pb-5 pt-2">{children}</div>
     </section>
   );
 }
 
 export function Kpi({ label, value, hint, tone }: { label: string; value: ReactNode; hint?: ReactNode; tone?: Tone | undefined }) {
   return (
-    <div className="rounded-lg border bg-panel p-4">
+    <div className="min-w-0 rounded-lg border bg-card p-4 lg:p-5">
       <div className="panel-title">{label}</div>
-      <div className={cn("mt-2 font-mono text-2xl font-semibold", tone === "crit" && "text-critical", tone === "warn" && "text-warning", tone === "ok" && "text-success")}>{value}</div>
+      <div className={cn("mt-3 font-mono text-3xl font-medium", tone === "crit" && "text-critical", tone === "warn" && "text-warning", tone === "ok" && "text-success")}>{value}</div>
       {hint && <div className="mt-1 text-xs text-muted-foreground">{hint}</div>}
     </div>
   );
@@ -88,10 +88,10 @@ export function QueryState({ isLoading, error, onRetry, empty, emptyText = "No r
 
 export function PageHeader({ title, subtitle, actions }: { title: string; subtitle?: string; actions?: ReactNode }) {
   return (
-    <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+    <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
-        {subtitle && <p className="mt-0.5 text-sm text-muted-foreground">{subtitle}</p>}
+        <h1 className="text-3xl font-semibold tracking-normal">{title}</h1>
+        {subtitle && <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">{subtitle}</p>}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
     </div>

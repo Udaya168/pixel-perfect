@@ -15,3 +15,4 @@
 - The browser never runs detection or talks to MQTT directly; it only renders backend-provided streams/metadata — perception lives in the PipeGen/TensorRT/DeepStream pipeline.
 - Never display a measured value (FPS, latency, GPU, accuracy) unless the backend reported it — demo mode leaves them null.
 - Backend contract is documented in `INTEGRATION.md`; update it with any endpoint change.
+- Shared page hierarchy and operational surfaces are owned by global semantic tokens, AppShell, and common presentation components — keeps all monitoring pages visually consistent without changing data logic.
