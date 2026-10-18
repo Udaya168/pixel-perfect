@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Kpi, Note, Panel, Pill, QueryState, PageHeader, stateTone } from "@/components/common";
 import { useCameras, useIncidents, useMode, usePpe, useSystemStatus } from "@/hooks/use-data";
@@ -8,12 +8,8 @@ import { EVENT_LABELS } from "@/types/incident";
 import { pageHead } from "@/lib/seo";
 import { axis, chartTooltip } from "@/lib/chart";
 
-export const Route = createFileRoute("/dashboard")({
-  head: pageHead("Overview", "Live safety KPIs, incident trends, camera and pipeline status."),
-  component: Dashboard,
-});
 
-function Dashboard() {
+export function Dashboard() {
   const { mode } = useMode();
   const inc = useIncidents();
   const cams = useCameras();
@@ -36,7 +32,7 @@ function Dashboard() {
     <div className="space-y-5">
       <PageHeader title="Overview" subtitle={mode === "demo" ? "Showing deterministic sample records — not real events." : "Derived from records received from the backend."} />
 
-      {inc.error && <Panel><QueryState isLoading={false} error={inc.error} onRetry={() => inc.refetch()} /></Panel>}
+      {!!inc.error && <Panel><QueryState isLoading={false} error={inc.error} onRetry={() => inc.refetch()} /></Panel>}
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
         <Kpi label="Incidents · 24h" value={inc.data ? last24.length : "—"} hint={`Historical total: ${inc.data ? all.length : "—"}`} />

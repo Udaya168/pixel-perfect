@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { createFileRoute } from '@tanstack/react-router';
 import { Search, GitBranch, ChevronRight, Cpu } from 'lucide-react';
 import { PageHeader, Pill } from '@/components/common';
 import { Button } from '@/components/ui/button';
@@ -7,11 +6,8 @@ import { Input } from '@/components/ui/input';
 import { ArchitectureDiagram } from '@/components/architecture/ArchitectureDiagram';
 import { architectureDiagrams } from '@/components/architecture/architecture-data';
 import { pageHead } from '@/lib/seo';
-export const Route = createFileRoute('/architecture')({
-  head: pageHead('Architecture Explorer', 'Explore seven interactive Workplace Safety Sentinel architecture diagrams with component details for the intended PipeGen v0.5.1, TensorRT and DeepStream pipeline.'),
-  component: ArchitecturePage,
-});
-function ArchitecturePage() {
+
+export function Architecture() {
   const [selectedId, setSelectedId] = useState('overall');
   const [search, setSearch] = useState('');
   const selected = architectureDiagrams.find(diagram => diagram.id === selectedId) ?? architectureDiagrams[0];

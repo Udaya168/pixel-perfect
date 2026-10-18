@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend } from "recharts";
 import { Input } from "@/components/ui/input";
@@ -10,12 +9,8 @@ import { axis, chartTooltip } from "@/lib/chart";
 import { EVENT_LABELS } from "@/types/incident";
 import { pageHead } from "@/lib/seo";
 
-export const Route = createFileRoute("/analytics")({
-  head: pageHead("Safety Analytics", "Incident trends by time, type, camera and zone, plus pipeline performance."),
-  component: Analytics,
-});
 
-function Analytics() {
+export function Analytics() {
   const { mode } = useMode();
   const inc = useIncidents();
   const cams = useCameras();

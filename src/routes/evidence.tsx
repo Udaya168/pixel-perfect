@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { Download, FileQuestion } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Note, PageHeader, Panel, Pill, QueryState } from "@/components/common";
@@ -9,12 +8,8 @@ import { EVIDENCE_CATEGORIES } from "@/types/domain";
 import { fmtTime } from "@/utils/format";
 import { pageHead } from "@/lib/seo";
 
-export const Route = createFileRoute("/evidence")({
-  head: pageHead("Evidence & Reports", "PipeGen, TensorRT, runtime and test evidence files supplied by the backend."),
-  component: EvidencePage,
-});
 
-function EvidencePage() {
+export function Evidence() {
   const { mode } = useMode();
   const ev = useEvidence();
   const items = ev.data ?? [];

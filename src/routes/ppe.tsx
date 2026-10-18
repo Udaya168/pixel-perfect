@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+
 import { Kpi, Note, PageHeader, Panel, Pill, QueryState, stateTone } from "@/components/common";
 import { useIncidents, usePpe } from "@/hooks/use-data";
 import { countBy } from "@/utils/analytics";
@@ -6,10 +6,7 @@ import { EVENT_LABELS } from "@/types/incident";
 import { fmtTime } from "@/utils/format";
 import { pageHead } from "@/lib/seo";
 
-export const Route = createFileRoute("/ppe")({
-  head: pageHead("PPE Monitoring", "Helmet and high-visibility vest detection status and validated incidents."),
-  component: Ppe,
-});
+
 
 function cap(available: boolean, validated: boolean) {
   if (!available) return { label: "Feature unavailable", tone: "muted" as const };
@@ -17,7 +14,7 @@ function cap(available: boolean, validated: boolean) {
   return { label: "Validated", tone: "ok" as const };
 }
 
-function Ppe() {
+export function Ppe() {
   const ppe = usePpe();
   const inc = useIncidents();
   const p = ppe.data;

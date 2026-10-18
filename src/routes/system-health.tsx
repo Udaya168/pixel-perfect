@@ -1,16 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Kpi, Note, PageHeader, Panel, Pill, QueryState, stateTone } from "@/components/common";
 import { useApiHealth, useCameras, useMode, useSystemStatus } from "@/hooks/use-data";
 import { fmtNum, fmtTime } from "@/utils/format";
 import { describeError } from "@/services/api-client";
-import { pageHead } from "@/lib/seo";
-
-export const Route = createFileRoute("/system-health")({
-  head: pageHead("System Health", "PipeGen, TensorRT, DeepStream, MQTT and backend diagnostics."),
-  component: SystemHealth,
-});
 
 function explain(msg: string) {
   const m = msg.toLowerCase();
@@ -21,7 +14,7 @@ function explain(msg: string) {
   return "Review the component logs on the edge device for more context.";
 }
 
-function SystemHealth() {
+export function SystemHealth() {
   const { mode } = useMode();
   const sys = useSystemStatus();
   const health = useApiHealth();
@@ -35,11 +28,11 @@ function SystemHealth() {
       <PageHeader
         title="System Health"
         subtitle={`Last successful update: ${fmtTime(s?.last_update)}`}
-        actions={<Button size="sm" variant="outline" disabled={sys.isFetching || cams.isFetching || (mode === "live" && health.isFetching)} onClick={() => { sys.refetch(); if (mode === "live") health.refetch(); cams.refetch(); }}><RefreshCw className="h-4 w-4" /> Refresh</Button>}
+        actions={<Button size="sm" variant="outline" disabled={sys.isLoading || cams.isLoading || (mode === "live" && health.isLoading)} onClick={() => { sys.refetch(); if (mode === "live") health.refetch(); cams.refetch(); }}><RefreshCw className="h-4 w-4" /> Refresh</Button>}
       />
       {mode === "live" && (
         <Panel title="Backend API">
-          {health.isSuccess ? <Pill tone="ok" dot>Reachable</Pill> : health.isLoading ? <Pill>Checking</Pill> : <div className="space-y-2"><Pill tone="crit" dot>Not connected</Pill><div className="text-sm text-muted-foreground">{describeError(health.error)}</div></div>}
+          {health.data != null ? <Pill tone="ok" dot>Reachable</Pill> : health.isLoading ? <Pill>Checking</Pill> : <div className="space-y-2"><Pill tone="crit" dot>Not connected</Pill><div className="text-sm text-muted-foreground">{describeError(health.error)}</div></div>}
         </Panel>
       )}
       <QueryState isLoading={sys.isLoading} error={sys.error} onRetry={() => sys.refetch()} />

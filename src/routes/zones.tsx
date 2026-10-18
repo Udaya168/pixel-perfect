@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+
 import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { Plus, Save, Trash2, Undo2 } from "lucide-react";
 import { toast } from "sonner";
@@ -26,16 +26,12 @@ const CAMERA_FRAMES: Record<string, string> = {
 };
 import { pageHead } from "@/lib/seo";
 
-export const Route = createFileRoute("/zones")({
-  head: pageHead("Hazard Zones", "Draw and manage restricted-zone polygons per camera."),
-  component: Zones,
-});
 
 const blank = (camera_id: string): Zone => ({
   zone_id: "", name: "", camera_id, points: [], enabled: true, persistence_frames: 5, cooldown_s: 30, applied: false, updated_at: null,
 });
 
-function Zones() {
+export function Zones() {
   const { mode } = useMode();
   const cams = useCameras();
   const zones = useZones();
@@ -61,13 +57,9 @@ function Zones() {
 
   const onSave = () => {
     if (!draft || error) return;
-    save.mutate({ zone: draft, isNew }, {
-      onSuccess: (z) => {
-        toast.success(z.applied ? "Saved and applied by backend" : "Saved — not yet confirmed active in pipeline");
-        setDraft(z); setIsNew(false);
-      },
-      onError: (e) => toast.error(describeError(e)),
-    });
+    save.mutate({ zone: draft, isNew });
+    toast.success("Zone saved");
+    setIsNew(false);
   };
 
   return (
@@ -147,10 +139,10 @@ function Zones() {
                 <pre className="max-h-28 overflow-auto rounded border bg-background p-2 font-mono text-[11px] text-muted-foreground">{JSON.stringify(draft.points)}</pre>
                 {error && <p className="text-xs text-critical">{error}</p>}
                 <div className="flex flex-wrap gap-2">
-                  <Button size="sm" disabled={!!error || save.isPending} onClick={onSave}><Save className="h-4 w-4" /> Save</Button>
+                  <Button size="sm" disabled={!!error || save.isLoading} onClick={onSave}><Save className="h-4 w-4" /> Save</Button>
                   <Button size="sm" variant="outline" disabled={!draft.points.length} onClick={() => setPts(draft.points.slice(0, -1))}><Undo2 className="h-4 w-4" /> Undo point</Button>
                   {!isNew && (
-                    <Button size="sm" variant="outline" disabled={del.isPending} onClick={() => del.mutate(draft.zone_id, { onSuccess: () => { toast.success("Zone deleted"); setDraft(null); }, onError: (e) => toast.error(describeError(e)) })}>
+                    <Button size="sm" variant="outline" disabled={del.isLoading} onClick={() => { del.mutate(draft.zone_id); toast.success("Zone deleted"); setDraft(null); }}>
                       <Trash2 className="h-4 w-4" /> Delete
                     </Button>
                   )}

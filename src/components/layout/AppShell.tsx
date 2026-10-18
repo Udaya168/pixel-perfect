@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { Link, useRouterState } from "@tanstack/react-router";
+import { NavLink, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, Video, Siren, Hexagon, HardHat, BarChart3, Activity, FileCheck2, Settings, ShieldCheck, ChevronRight,
+  LayoutDashboard, Video, Siren, Hexagon, HardHat, BarChart3, Activity, FileCheck2, Settings, ChevronRight,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton,
@@ -23,7 +23,7 @@ const nav = [
 ] as const;
 
 function AppSidebar() {
-  const path = useRouterState({ select: (s) => s.location.pathname });
+  const { pathname } = useLocation();
   const { state, setOpenMobile } = useSidebar();
   const collapsed = state === "collapsed";
   return (
@@ -31,7 +31,7 @@ function AppSidebar() {
       <SidebarHeader className="border-b border-sidebar-border py-6">
         <div className="flex items-center gap-3 px-1">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-primary text-primary-foreground">
-            <ShieldCheck className="h-5 w-5" />
+            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           </div>
           {!collapsed && (
             <div className="leading-tight">
@@ -48,11 +48,16 @@ function AppSidebar() {
             <SidebarMenu>
               {nav.map((n) => (
                 <SidebarMenuItem key={n.to}>
-                  <SidebarMenuButton className="h-10 text-[13px] data-[active=true]:font-semibold" asChild isActive={path.startsWith(n.to)} tooltip={n.label}>
-                    <Link to={n.to} onClick={() => setOpenMobile(false)}>
+                  <SidebarMenuButton
+                    className="h-10 text-[13px] data-[active=true]:font-semibold"
+                    asChild
+                    isActive={pathname.startsWith(n.to)}
+                    tooltip={n.label}
+                  >
+                    <NavLink to={n.to} onClick={() => setOpenMobile(false)}>
                       <n.icon className="h-4 w-4" />
-                       <span>{n.label}</span>
-                    </Link>
+                      <span>{n.label}</span>
+                    </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -62,7 +67,7 @@ function AppSidebar() {
       </SidebarContent>
       <SidebarFooter className="border-t border-sidebar-border py-4">
         <div className="flex items-center gap-3 px-1">
-          <ShieldCheck className="h-5 w-5 shrink-0 text-primary" />
+          <svg className="h-5 w-5 shrink-0 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           {!collapsed && <div className="text-xs"><div className="font-medium text-foreground">Edge safety platform</div><div className="mt-1 text-[10px] text-muted-foreground">PipeGen / TensorRT / DeepStream</div></div>}
         </div>
       </SidebarFooter>
@@ -83,8 +88,8 @@ function Clock() {
 function StatusBar() {
   const { mode } = useMode();
   const health = useApiHealth();
-  const path = useRouterState({ select: (s) => s.location.pathname });
-  const current = nav.find((n) => path.startsWith(n.to));
+  const { pathname } = useLocation();
+  const current = nav.find((n) => pathname.startsWith(n.to));
   return (
     <header className="sticky top-0 z-20 flex min-h-16 items-center gap-3 border-b bg-background/95 px-4 backdrop-blur md:px-7">
       <SidebarTrigger />
@@ -92,7 +97,7 @@ function StatusBar() {
       <div className="flex min-w-0 flex-1 items-center justify-end gap-3">
         {mode === "demo" ? (
            <Pill tone="warn" dot>Demo mode · sample data</Pill>
-        ) : health.isSuccess ? (
+        ) : health.data != null ? (
           <Pill tone="ok" dot>Backend connected</Pill>
         ) : health.isLoading ? (
           <Pill tone="muted" dot>Checking backend…</Pill>

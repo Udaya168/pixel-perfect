@@ -1,19 +1,15 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
+
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Note, PageHeader, Panel, Pill } from "@/components/common";
-import { useApiHealth, useMode } from "@/hooks/use-data";
+import { clearAllCache, useApiHealth, useMode } from "@/hooks/use-data";
 import { config, resolveWsUrl } from "@/config";
 import { describeError } from "@/services/api-client";
 import { pageHead } from "@/lib/seo";
 import { Cable, Database, Braces, ArrowUpRight, RotateCw } from "lucide-react";
 
-export const Route = createFileRoute("/settings")({
-  head: pageHead("Settings", "Data source, backend connection and integration configuration."),
-  component: Settings,
-});
+
 
 const endpoints = [
   "GET /api/health", "GET /api/system/status", "GET /api/cameras", "GET /api/cameras/{camera_id}/status",
@@ -24,10 +20,10 @@ const endpoints = [
   "WS  /ws/detections/{camera_id}",
 ];
 
-function Settings() {
+export function Settings() {
   const { mode, setMode } = useMode();
   const health = useApiHealth();
-  const qc = useQueryClient();
+  const qc = { clear: clearAllCache };
   return (
     <div className="space-y-7">
       <PageHeader title="System Settings" />
@@ -46,7 +42,7 @@ function Settings() {
             <div className="flex flex-wrap items-start justify-between gap-2 py-3"><dt className="text-xs text-muted-foreground">API base URL</dt><dd className="max-w-full break-all font-mono text-xs">{config.apiBaseUrl ?? "Not configured"}</dd></div>
             <div className="flex flex-wrap items-start justify-between gap-2 py-3"><dt className="text-xs text-muted-foreground">Detection WebSocket</dt><dd className="max-w-full break-all font-mono text-xs">{resolveWsUrl("/detections/{camera_id}") ?? "Not configured"}</dd></div>
             <div className="flex flex-wrap items-start justify-between gap-2 py-3"><dt className="text-xs text-muted-foreground">Status</dt><dd className="min-w-0 max-w-full">
-              {mode === "demo" ? <Pill>Not used in demo mode</Pill> : health.isSuccess ? <Pill tone="ok" dot>Reachable</Pill> : health.isLoading ? <Pill>Checking</Pill> : <Pill tone="crit" dot>{describeError(health.error)}</Pill>}
+              {mode === "demo" ? <Pill>Not used in demo mode</Pill> : health.data != null ? <Pill tone="ok" dot>Reachable</Pill> : health.isLoading ? <Pill>Checking</Pill> : <Pill tone="crit" dot>{describeError(health.error)}</Pill>}
             </dd></div>
           </dl>
           <Button size="sm" variant="outline" className="mt-4" disabled={mode === "demo"} onClick={() => health.refetch()}><RotateCw className="h-3.5 w-3.5" />Test connection</Button>

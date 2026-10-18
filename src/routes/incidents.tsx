@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+
 import { useMemo, useState } from "react";
 import { ArrowDownUp, Download, Check, CheckCheck } from "lucide-react";
 import { toast } from "sonner";
@@ -13,15 +13,11 @@ import { downloadJson, fmtPct, fmtTime } from "@/utils/format";
 import { describeError } from "@/services/api-client";
 import { pageHead } from "@/lib/seo";
 
-export const Route = createFileRoute("/incidents")({
-  head: pageHead("Incident Centre", "Search, filter, acknowledge and resolve safety incidents."),
-  component: Incidents,
-});
 
 const sel = "h-9 rounded-md border bg-background px-2 text-sm";
 const PAGE = 15;
 
-function Incidents() {
+export function Incidents() {
   const { mode } = useMode();
   const q = useIncidents();
   const ppe = usePpe();
@@ -152,11 +148,10 @@ function Incidents() {
 
 function IncidentDetail({ inc }: { inc: Incident }) {
   const m = useUpdateIncident();
-  const act = (status: string) =>
-    m.mutate({ id: inc.event_id, status }, {
-      onSuccess: () => toast.success(`Incident ${status}`),
-      onError: (e) => toast.error(describeError(e)),
-    });
+  const act = (status: string) => {
+    m.mutate({ id: inc.event_id, status });
+    toast.success(`Incident ${status}`);
+  };
   const fields: [string, string][] = [
     ["Timestamp", fmtTime(inc.timestamp)],
     ["Event type", EVENT_LABELS[inc.event_type] ?? inc.event_type],
@@ -182,10 +177,10 @@ function IncidentDetail({ inc }: { inc: Incident }) {
         ))}
       </dl>
       <div className="mt-5 flex gap-2">
-        <Button size="sm" variant="outline" disabled={inc.status !== "open" || m.isPending} onClick={() => act("acknowledged")}>
+        <Button size="sm" variant="outline" disabled={inc.status !== "open" || m.isLoading} onClick={() => act("acknowledged")}>
           <Check className="h-4 w-4" /> Acknowledge
         </Button>
-        <Button size="sm" disabled={inc.status === "resolved" || m.isPending} onClick={() => act("resolved")}>
+        <Button size="sm" disabled={inc.status === "resolved" || m.isLoading} onClick={() => act("resolved")}>
           <CheckCheck className="h-4 w-4" /> Resolve
         </Button>
       </div>

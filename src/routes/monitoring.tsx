@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+
 import { useEffect, useRef, useState } from "react";
 import { Maximize, Play, RefreshCw, Square, Upload, VideoOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -24,12 +24,7 @@ const CAMERA_FRAMES: Record<string, string> = {
 };
 import { pageHead } from "@/lib/seo";
 
-export const Route = createFileRoute("/monitoring")({
-  head: pageHead("Live Monitoring", "Annotated camera streams with detections and restricted-zone overlays."),
-  component: Monitoring,
-});
-
-function Monitoring() {
+export function Monitoring() {
   const { mode } = useMode();
   const cams = useCameras();
   const zones = useZones();
