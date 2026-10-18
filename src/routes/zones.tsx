@@ -12,7 +12,18 @@ import { validatePolygon, type Pt } from "@/utils/geometry";
 import { describeError } from "@/services/api-client";
 import type { Zone } from "@/types/domain";
 import { fmtTime } from "@/utils/format";
+import camPress from "@/assets/cam-press.jpg";
+import camLoading from "@/assets/cam-loading.jpg";
+import camCnc from "@/assets/cam-cnc.jpg";
+import camAisle from "@/assets/cam-aisle.jpg";
 import sampleFrame from "@/assets/sample-frame.jpg";
+
+const CAMERA_FRAMES: Record<string, string> = {
+  "CAM-01": camPress,
+  "CAM-02": camLoading,
+  "CAM-03": camCnc,
+  "CAM-04": camAisle,
+};
 import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/zones")({
@@ -73,7 +84,7 @@ function Zones() {
         >
           <div className="relative aspect-video w-full overflow-hidden rounded-md border bg-background select-none">
             {mode === "demo" ? (
-              <img src={sampleFrame} alt="Sample reference frame" width={1280} height={720} className="h-full w-full object-cover" />
+              <img src={CAMERA_FRAMES[camId] ?? sampleFrame} alt="Sample reference frame" width={1280} height={720} loading="lazy" className="h-full w-full object-cover" />
             ) : cam?.stream_url ? (
               <img src={cam.stream_url} alt="Camera reference" className="h-full w-full object-cover" />
             ) : (

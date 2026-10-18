@@ -22,8 +22,8 @@ export const demoCameras: Camera[] = [
 ];
 
 let demoZones: Zone[] = [
-  { zone_id: "ZONE-CNC-1", name: "CNC machine envelope", camera_id: "CAM-03", points: [[0.6, 0.55], [0.98, 0.62], [0.98, 0.98], [0.82, 0.98], [0.6, 0.72]], enabled: true, persistence_frames: 5, cooldown_s: 30, applied: false, updated_at: null },
-  { zone_id: "ZONE-FORK-1", name: "Forklift parking", camera_id: "CAM-03", points: [[0.3, 0.24], [0.5, 0.22], [0.54, 0.34], [0.36, 0.37]], enabled: true, persistence_frames: 5, cooldown_s: 60, applied: false, updated_at: null },
+  { zone_id: "ZONE-CNC-1", name: "CNC machine envelope", camera_id: "CAM-03", points: [[0.02, 0.06], [0.56, 0.02], [0.58, 0.5], [0.36, 0.62], [0.04, 0.56]], enabled: true, persistence_frames: 5, cooldown_s: 30, applied: false, updated_at: null },
+  { zone_id: "ZONE-FORK-1", name: "Forklift parking", camera_id: "CAM-03", points: [[0.46, 0.62], [0.94, 0.56], [0.98, 0.96], [0.5, 0.98]], enabled: true, persistence_frames: 5, cooldown_s: 60, applied: false, updated_at: null },
 ];
 
 function buildIncidents(): Incident[] {
