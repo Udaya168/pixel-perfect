@@ -1,4 +1,4 @@
-# Workplace Safety Sentinel
+# SafeVio
 
 Industrial AI safety monitoring dashboard for edge computer-vision pipelines.
 

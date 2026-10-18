@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Pill } from "@/components/common";
 import { useApiHealth, useMode } from "@/hooks/use-data";
+import { SafeVioLogo } from "@/components/brand/SafeVioLogo";
 
 const nav = [
   { to: "/dashboard", label: "Overview", icon: LayoutDashboard },
@@ -29,16 +30,11 @@ function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border py-6">
-        <div className="flex items-center gap-3 px-1">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-primary text-primary-foreground">
-            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          </div>
-          {!collapsed && (
-            <div className="leading-tight">
-              <div className="text-base font-semibold text-foreground">Safety Sentinel<span className="text-primary">.</span></div>
-              <div className="mt-1 text-[10px] text-muted-foreground">See Risks. Act Earlier.</div>
-            </div>
-          )}
+        <div className={`flex items-center gap-3 ${collapsed ? "justify-center" : "px-1"}`}>
+          <SafeVioLogo
+            variant={collapsed ? "icon" : "horizontal"}
+            className={collapsed ? "h-8 w-8 shrink-0" : "h-auto w-full max-w-[220px]"}
+          />
         </div>
       </SidebarHeader>
       <SidebarContent>
@@ -67,8 +63,8 @@ function AppSidebar() {
       </SidebarContent>
       <SidebarFooter className="border-t border-sidebar-border py-4">
         <div className="flex items-center gap-3 px-1">
-          <svg className="h-5 w-5 shrink-0 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          {!collapsed && <div className="text-xs"><div className="font-medium text-foreground">Edge safety platform</div><div className="mt-1 text-[10px] text-muted-foreground">PipeGen / TensorRT / DeepStream</div></div>}
+          <SafeVioLogo variant="icon" className="h-5 w-5 shrink-0" />
+          {!collapsed && <div className="text-xs"><div className="font-medium text-foreground">SafeVio safety platform</div><div className="mt-1 text-[10px] text-muted-foreground">Inference pipeline unverified</div></div>}
         </div>
       </SidebarFooter>
     </Sidebar>

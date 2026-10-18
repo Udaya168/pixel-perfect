@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 160" fill="none">
+  <g transform="translate(0 10)">
+    <path d="M64 7 112 27v33c0 29-19 50-48 62C35 110 16 89 16 60V27L64 7Z" stroke="#55E0B5" stroke-width="6" stroke-linejoin="round"/>
+    <path d="M43 39H34v16m51-16h9v16M34 73v16h9m51-16v16h-9" stroke="#55E0B5" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="64" cy="64" r="25" fill="#55E0B5"/>
+    <circle cx="64" cy="64" r="19" fill="#111719"/>
+    <circle cx="64" cy="64" r="12" fill="#0B0F10"/>
+    <circle cx="70" cy="58" r="4" fill="#FFFFFF"/>
+  </g>
+  <text x="145" y="69" font-family="IBM Plex Sans, Arial, sans-serif" font-size="54" font-weight="700" letter-spacing="-1.5">
+    <tspan fill="#FFFFFF">Safe</tspan><tspan fill="#55E0B5">Vio</tspan>
+  </text>
+  <text x="148" y="101" fill="#9CA3AF" font-family="IBM Plex Sans, Arial, sans-serif" font-size="17" font-weight="500" letter-spacing=".2">AI Vision for a Safer Tomorrow</text>
+  <text x="148" y="128" fill="#FFFFFF" font-family="IBM Plex Sans, Arial, sans-serif" font-size="12" font-weight="600" letter-spacing="2.5">DETECT <tspan fill="#55E0B5">·</tspan> PREVENT <tspan fill="#55E0B5">·</tspan> PROTECT</text>
+</svg>

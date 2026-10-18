@@ -1,6 +1,6 @@
-# Workplace Safety Sentinel — Backend Integration
+# SafeVio — Backend Integration
 
-The dashboard is a frontend only. Detection runs in the PipeGen v0.5.1 → TensorRT → DeepStream pipeline on the edge device. A Python FastAPI service must expose the **proposed** endpoints below; none are assumed to exist.
+The dashboard is frontend only. The PipeGen v0.5.1 → TensorRT → DeepStream edge inference pipeline is an intended architecture and has not been verified as operational. A Python FastAPI service must expose the **proposed** endpoints below; none are assumed to exist.
 
 ## Configuration
 - `VITE_API_BASE_URL` — e.g. `https://edge-gw.example.com` (no trailing slash).

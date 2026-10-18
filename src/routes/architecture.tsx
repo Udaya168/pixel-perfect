@@ -14,7 +14,7 @@ export function Architecture() {
   if (!selected) return null;
   const visible = architectureDiagrams.filter(diagram => `${diagram.title} ${diagram.description}`.toLowerCase().includes(search.toLowerCase()));
   return <div className="space-y-5">
-    <PageHeader title="System Architecture" subtitle="Workplace Safety Sentinel · Track A — PipeGen (Perception)" actions={<Pill tone="warn" dot>Pipeline unverified</Pill>} />
+    <PageHeader title="System Architecture" subtitle="SafeVio · Track A — PipeGen (Perception)" actions={<Pill tone="warn" dot>Pipeline unverified</Pill>} />
     <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-y py-3 text-xs text-muted-foreground"><span className="flex items-center gap-2"><Cpu className="h-4 w-4 text-primary" />PipeGen v0.5.1 · TensorRT · DeepStream</span><span>NVIDIA RTX 3050 · 4 GB VRAM</span><span>Frontend: demo/sample data</span></div>
     <div className="architecture-explorer">
       <aside className="architecture-navigation" aria-label="Architecture diagrams">

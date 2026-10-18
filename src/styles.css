@@ -59,24 +59,24 @@
 /* Graphite surfaces with restrained mint, amber, and red operational signals. */
 :root {
   --radius: 0.375rem;
-  --background: oklch(0.165 0.006 240);
-  --foreground: oklch(0.94 0.005 180);
-  --card: oklch(0.215 0.008 240);
+  --background: #0B0F10;
+  --foreground: #FFFFFF;
+  --card: #111719;
   --card-foreground: var(--foreground);
-  --panel: oklch(0.195 0.007 240);
+  --panel: #111719;
   --popover: oklch(0.235 0.008 240);
   --popover-foreground: var(--foreground);
-  --primary: oklch(0.82 0.135 166);
-  --primary-foreground: oklch(0.19 0.025 166);
+  --primary: #55E0B5;
+  --primary-foreground: #0B0F10;
   --secondary: oklch(0.26 0.008 240);
   --secondary-foreground: var(--foreground);
   --muted: oklch(0.235 0.008 240);
-  --muted-foreground: oklch(0.69 0.013 220);
+  --muted-foreground: #9CA3AF;
   --accent: oklch(0.285 0.016 166);
   --accent-foreground: var(--foreground);
   --destructive: oklch(0.64 0.22 25);
   --destructive-foreground: oklch(0.98 0 0);
-  --success: oklch(0.74 0.17 152);
+  --success: #55E0B5;
   --warning: oklch(0.8 0.16 75);
   --critical: oklch(0.64 0.22 25);
   --border: oklch(0.305 0.009 240);
@@ -87,7 +87,7 @@
   --chart-3: oklch(0.64 0.22 25);
   --chart-4: oklch(0.74 0.17 152);
   --chart-5: oklch(0.7 0.03 255);
-  --sidebar: oklch(0.19 0.008 240);
+  --sidebar: #111719;
   --sidebar-foreground: oklch(0.78 0.01 220);
   --sidebar-primary: var(--primary);
   --sidebar-primary-foreground: var(--primary-foreground);
