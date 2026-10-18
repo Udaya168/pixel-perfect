@@ -10,6 +10,6 @@
 - [x] Verify diagrams, controls, page metadata, existing navigation and responsive layouts.
 
 # Interactive architecture explorer
-- [ ] Replace stacked diagrams with searchable selection and an interactive canvas.
-- [ ] Add structured node details, accurate status legend, view controls and export.
-- [ ] Verify all seven diagrams and interaction controls across desktop and laptop sizes.
+- [x] Replace stacked diagrams with searchable selection and an interactive canvas.
+- [x] Add structured node details, accurate status legend, view controls and export.
+- [x] Verify all seven diagrams and interaction controls across desktop and laptop sizes.
