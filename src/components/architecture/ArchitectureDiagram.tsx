@@ -60,7 +60,7 @@ export function ArchitectureDiagram({ diagram }: { diagram: DiagramData }) {
         if (!from || !to) return null;
         return <path key={i} d={connector(from, to)} className={`architecture-edge ${edge.control ? 'architecture-control' : ''} ${edge.optional ? 'architecture-optional-edge' : ''}`} markerEnd={`url(#${marker}-${large ? 'large' : 'inline'})`} />;
       })}
-      {diagram.nodes.map(node => <g key={node.id} className={`architecture-node architecture-role-${node.role} ${node.optional ? 'architecture-optional' : ''}`}><title>{node.detail} Status: {node.status}.</title>
+      {diagram.nodes.map(node => <g key={node.id} className={`architecture-node architecture-role-${node.role} ${node.optional ? 'architecture-optional' : ''}`}><title>{`${node.detail} Status: ${node.status}.`}</title>
         <rect x={node.x} y={node.y} width={nodeWidth} height={nodeHeight} rx="6" />
         <rect x={node.x} y={node.y + 12} width="3" height="74" className="architecture-node-accent" />
         <text x={node.x + 16} y={node.y + 21} className="architecture-node-category">{node.role.toUpperCase()}{node.optional ? ' · OPTIONAL' : ''}</text>
