@@ -30,7 +30,9 @@ describe('Fast demo navigation', () => {
     const timers = vi.spyOn(globalThis, 'setTimeout');
     const cameras = await demo.listCameras();
     expect(timers).not.toHaveBeenCalled();
-    cameras[0].name = 'Changed copy';
+    const camera = cameras[0];
+    expect(camera).toBeDefined();
+    if (camera) camera.name = 'Changed copy';
     expect((await demo.listCameras())[0]?.name).toBe('Press line A');
   });
 });
