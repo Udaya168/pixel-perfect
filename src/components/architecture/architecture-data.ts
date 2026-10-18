@@ -54,8 +54,10 @@ if (overall) {
 const pipegen = architectureDiagrams[1];
 if (pipegen) {
   pipegen.boundaries = [{ label: 'COMPILATION · PipeGen v0.5.1 + TensorRT', x: 15, y: 22, width: 930, height: 280 }];
-  pipegen.nodes.push({ id: 'runtime-video', label: 'Input Video / Config', role: 'input', detail: 'Input video and generated pipeline configuration feed runtime execution.', x: 650, y: 345, status: 'Planned' });
+  pipegen.nodes.forEach((node, i) => { if (i >= 5) { node.x = 30 + (i - 5) * 310; node.y = 345; } });
+  pipegen.nodes.push({ id: 'runtime-video', label: 'Input Video / Config', role: 'input', detail: 'Input video and generated pipeline configuration feed runtime execution.', x: 30, y: 490, status: 'Planned' });
   pipegen.edges.push({ from: 'runtime-video', to: 'pipegen-5', control: true });
+  pipegen.height = 635;
 }
 const deploy = architectureDiagrams[4];
 if (deploy) {
@@ -71,6 +73,6 @@ if (mqtt) {
 const modules = architectureDiagrams[6];
 if (modules) {
   modules.edges = modules.edges.filter(e => e.to !== 'modules-9' && e.to !== 'modules-10');
-  modules.edges.push({ from: 'modules-6', to: 'modules-9', optional: true }, { from: 'modules-10', to: 'modules-7', control: true }, { from: 'modules-10', to: 'modules-4', control: true });
+  modules.edges.push({ from: 'modules-6', to: 'modules-9', optional: true }, { from: 'modules-10', to: 'modules-7', control: true });
 }
 export const sampleEvent = { event_id: 'SAMPLE-ZONE-0001', event_type: 'restricted_zone_entry', timestamp: '2026-10-18T07:00:00Z', camera_id: 'SAMPLE-CAMERA-01', track_id: 42, zone_id: 'SAMPLE-ZONE-A', confidence: 0.94, evidence_path: null, severity: 'high' };
