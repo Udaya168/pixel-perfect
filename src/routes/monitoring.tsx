@@ -91,7 +91,7 @@ function Monitoring() {
               )
             ) : !live ? (
               <>
-                <img src={sampleFrame} alt="Sample reference frame" width={1280} height={720} className="h-full w-full object-cover opacity-70" />
+                <img src={(camId && CAMERA_FRAMES[camId]) || sampleFrame} alt="Sample reference frame" width={1280} height={720} loading="lazy" className="h-full w-full object-cover opacity-70" />
                 <div className="absolute left-3 top-3"><Pill tone="warn">Sample preview — not a live feed</Pill></div>
               </>
             ) : (
