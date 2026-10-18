@@ -6,17 +6,12 @@ import { countBy, inRange, RANGE_MS, timeBuckets } from "@/utils/analytics";
 import { fmtNum, fmtTime } from "@/utils/format";
 import { EVENT_LABELS } from "@/types/incident";
 import { pageHead } from "@/lib/seo";
+import { axis, chartTooltip } from "@/lib/chart";
 
 export const Route = createFileRoute("/dashboard")({
   head: pageHead("Overview", "Live safety KPIs, incident trends, camera and pipeline status."),
   component: Dashboard,
 });
-
-export const chartTooltip = {
-  contentStyle: { background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 6, fontSize: 12 },
-  labelStyle: { color: "var(--muted-foreground)" },
-};
-export const axis = { stroke: "var(--muted-foreground)", fontSize: 11, tickLine: false, axisLine: false } as const;
 
 function Dashboard() {
   const { mode } = useMode();
