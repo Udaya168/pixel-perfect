@@ -10,7 +10,18 @@ import { backend } from "@/services/backend";
 import { describeError } from "@/services/api-client";
 import { EVENT_LABELS } from "@/types/incident";
 import { fmtNum, fmtTime } from "@/utils/format";
+import camPress from "@/assets/cam-press.jpg";
+import camLoading from "@/assets/cam-loading.jpg";
+import camCnc from "@/assets/cam-cnc.jpg";
+import camAisle from "@/assets/cam-aisle.jpg";
 import sampleFrame from "@/assets/sample-frame.jpg";
+
+const CAMERA_FRAMES: Record<string, string> = {
+  "CAM-01": camPress,
+  "CAM-02": camLoading,
+  "CAM-03": camCnc,
+  "CAM-04": camAisle,
+};
 import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/monitoring")({
@@ -80,7 +91,7 @@ function Monitoring() {
               )
             ) : !live ? (
               <>
-                <img src={sampleFrame} alt="Sample reference frame" width={1280} height={720} className="h-full w-full object-cover opacity-70" />
+                <img src={(camId && CAMERA_FRAMES[camId]) || sampleFrame} alt="Sample reference frame" width={1280} height={720} loading="lazy" className="h-full w-full object-cover opacity-70" />
                 <div className="absolute left-3 top-3"><Pill tone="warn">Sample preview — not a live feed</Pill></div>
               </>
             ) : (
