@@ -48,6 +48,11 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-architecture-input: var(--architecture-input);
+  --color-architecture-inference: var(--architecture-inference);
+  --color-architecture-analytics: var(--architecture-analytics);
+  --color-architecture-storage: var(--architecture-storage);
+  --color-architecture-output: var(--architecture-output);
 }
 
 /* Graphite surfaces with restrained mint, amber, and red operational signals. */
@@ -90,6 +95,11 @@
   --sidebar-border: var(--border);
   --sidebar-ring: var(--ring);
   --glow-active: 0 0 0 3px color-mix(in oklab, var(--success) 25%, transparent);
+  --architecture-input: oklch(0.79 0.095 225);
+  --architecture-inference: var(--primary);
+  --architecture-analytics: var(--warning);
+  --architecture-storage: oklch(0.8 0.09 340);
+  --architecture-output: var(--success);
 }
 
 @layer base {
@@ -126,3 +136,29 @@
 .app-content table tbody tr:hover { background: var(--muted); }
 @keyframes content-enter { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) { .app-content { animation: none; } }
+
+.architecture-scroll { border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); }
+.architecture-svg { display: block; width: 100%; min-width: 760px; height: auto; font-family: var(--font-sans); }
+.architecture-zoom-75 { width: 75%; min-width: 570px; }
+.architecture-zoom-125 { width: 125%; min-width: 950px; }
+.architecture-zoom-150 { width: 150%; min-width: 1140px; }
+.architecture-background { fill: var(--panel); }
+.architecture-role-input { --node-color: var(--architecture-input); }
+.architecture-role-inference { --node-color: var(--architecture-inference); }
+.architecture-role-analytics { --node-color: var(--architecture-analytics); }
+.architecture-role-storage { --node-color: var(--architecture-storage); }
+.architecture-role-output { --node-color: var(--architecture-output); }
+.architecture-node > rect { fill: var(--card); stroke: color-mix(in oklab, var(--node-color) 45%, var(--border)); stroke-width: 1; }
+.architecture-node > .architecture-node-accent { fill: var(--node-color); stroke: none; }
+.architecture-node-category { fill: var(--node-color); font-family: var(--font-mono); font-size: 10px; }
+.architecture-node-label { fill: var(--foreground); font-size: 15px; font-weight: 500; }
+.architecture-node-status { fill: var(--muted-foreground); font-family: var(--font-mono); font-size: 10px; }
+.architecture-node:hover > rect { stroke: var(--node-color); }
+.architecture-optional > rect { stroke-dasharray: 5 4; }
+.architecture-edge { fill: none; stroke: var(--muted-foreground); stroke-width: 1.5; }
+.architecture-arrow { fill: var(--muted-foreground); }
+.architecture-control { stroke-dasharray: 3 5; }
+.architecture-optional-edge { stroke-dasharray: 7 4; }
+.architecture-boundary { fill: none; stroke: var(--border); stroke-width: 1.5; }
+.architecture-boundary-label { fill: var(--muted-foreground); font-family: var(--font-mono); font-size: 10px; }
+.architecture-legend-dot { background: var(--node-color); }
