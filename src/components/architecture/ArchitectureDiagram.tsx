@@ -27,13 +27,21 @@ export function ArchitectureDiagram({ diagram }: { diagram: DiagramData }) {
   const [error, setError] = useState('');
   const workspace = useRef<HTMLDivElement>(null);
   const nodes = useMemo<FlowNode[]>(() => diagram.nodes.map(node => ({ id: node.id, type: 'component', position: { x: node.x, y: node.y }, data: { component: node }, ariaLabel: `${node.label} component`, focusable: true })), [diagram]);
-  const edges = useMemo(() => diagram.edges.map((edge, i) => ({ id: `${diagram.id}-edge-${i}`, source: edge.from, target: edge.to, label: edge.label, type: 'smoothstep', markerEnd: { type: MarkerType.ArrowClosed }, className: edge.optional || edge.control ? 'architecture-flow-dashed' : undefined })), [diagram]);
+  const edges = useMemo(() => diagram.edges.map((edge, i) => ({ id: `${diagram.id}-edge-${i}`, source: edge.from, target: edge.to, label: edge.label, type: 'smoothstep', markerEnd: { type: MarkerType.ArrowClosed }, className: edge.optional || edge.control ? 'architecture-flow-dashed' : '' })), [diagram]);
   useEffect(() => {
     const close = (event: KeyboardEvent) => { if (event.key === 'Escape') setFullscreen(false); };
     document.addEventListener('keydown', close);
     return () => document.removeEventListener('keydown', close);
   }, []);
   useEffect(() => { const timer = setTimeout(() => { void instance?.fitView({ padding: 0.16 }); }, 80); return () => clearTimeout(timer); }, [fullscreen, instance, view]);
+  useEffect(() => {
+    const element = workspace.current;
+    if (!element || !instance) return;
+    let timer: ReturnType<typeof setTimeout>;
+    const observer = new ResizeObserver(() => { clearTimeout(timer); timer = setTimeout(() => { void instance.fitView({ padding: 0.16 }); }, 200); });
+    observer.observe(element);
+    return () => { observer.disconnect(); clearTimeout(timer); };
+  }, [instance]);
   async function download(format: 'png' | 'svg') {
     const viewport = workspace.current?.querySelector<HTMLElement>('.react-flow__viewport');
     if (!viewport || !instance) return;
