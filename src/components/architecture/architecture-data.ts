@@ -6,9 +6,9 @@ type Step = [string, NodeRole, string, boolean?];
 function sequence(id: string, title: string, description: string, steps: Step[], details: string[]): ArchitectureDiagram {
   const nodes: ArchitectureNode[] = steps.map(([label, role, detail, optional], i) => {
     const row = Math.floor(i / 3);
-    return { id: `${id}-${i}`, label, role, detail, x: 30 + (row % 2 === 0 ? i % 3 : 2 - i % 3) * 310, y: 55 + row * 145, optional, status: 'Planned' };
+    return { id: `${id}-${i}`, label, role, detail, x: 30 + (row % 2 === 0 ? i % 3 : 2 - i % 3) * 310, y: 55 + row * 145, optional: optional ?? false, status: 'Planned' };
   });
-  return { id, title, description, nodes, edges: nodes.slice(1).map((node, i) => ({ from: nodes[i]?.id ?? '', to: node.id, optional: node.optional })), height: Math.ceil(steps.length / 3) * 145 + 40, details };
+  return { id, title, description, nodes, edges: nodes.slice(1).map((node, i) => ({ from: nodes[i]?.id ?? '', to: node.id, optional: node.optional ?? false })), height: Math.ceil(steps.length / 3) * 145 + 40, details };
 }
 export const architectureDiagrams: ArchitectureDiagram[] = [
   sequence('overall', 'Overall System Architecture', 'From video ingestion to actionable safety events, with independent reporting and alerting paths.', [
