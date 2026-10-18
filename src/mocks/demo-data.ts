@@ -33,14 +33,14 @@ function buildIncidents(): Incident[] {
   const zonesByCam: Record<string, string> = { "CAM-01": "ZONE-PRESS-1", "CAM-02": "ZONE-DOCK-1", "CAM-03": "ZONE-CNC-1", "CAM-04": "ZONE-AISLE-2" };
   const out: Incident[] = [];
   for (let i = 0; i < 64; i++) {
-    const cam = demoCameras[Math.floor(r() * 4)].camera_id;
+    const cam = demoCameras[Math.floor(r() * 4)]!.camera_id;
     const ts = new Date(anchor - Math.floor(r() * 7 * 24 * 3600000)).toISOString();
     const roll = r();
     const status = i < 6 ? "open" : roll < 0.15 ? "open" : roll < 0.4 ? "acknowledged" : "resolved";
     const d = r();
     const delivery = d < 0.75 ? "delivered" : d < 0.9 ? "pending" : "failed";
     const sev = (["medium", "high", "critical"] as const)[Math.floor(r() * 3)];
-    const history = [{ from: null, to: "open", at: ts, by: "event-processor" }];
+    const history: { from: string | null; to: string; at: string; by: string }[] = [{ from: null, to: "open", at: ts, by: "event-processor" }];
     if (status !== "open") history.push({ from: "open", to: "acknowledged", at: new Date(Date.parse(ts) + 120000).toISOString(), by: "demo-operator" });
     if (status === "resolved") history.push({ from: "acknowledged", to: "resolved", at: new Date(Date.parse(ts) + 900000).toISOString(), by: "demo-operator" });
     out.push({
@@ -49,7 +49,7 @@ function buildIncidents(): Incident[] {
       camera_id: cam,
       event_type: "restricted_zone_entry",
       track_id: 100 + Math.floor(r() * 400),
-      zone_id: zonesByCam[cam],
+      zone_id: zonesByCam[cam] ?? null,
       confidence: Math.round((0.55 + r() * 0.4) * 100) / 100,
       status,
       delivery_status: delivery,

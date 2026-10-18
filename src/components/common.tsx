@@ -45,7 +45,7 @@ export function Panel({ title, action, children, className }: { title?: ReactNod
   );
 }
 
-export function Kpi({ label, value, hint, tone }: { label: string; value: ReactNode; hint?: ReactNode; tone?: Tone }) {
+export function Kpi({ label, value, hint, tone }: { label: string; value: ReactNode; hint?: ReactNode; tone?: Tone | undefined }) {
   return (
     <div className="rounded-lg border bg-panel p-4">
       <div className="panel-title">{label}</div>

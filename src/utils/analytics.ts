@@ -24,7 +24,7 @@ export function timeBuckets(list: Incident[], from: number, to: number, bucketMs
   const out = Array.from({ length: n }, (_, k) => ({ t: from + k * bucketMs, count: 0 }));
   for (const i of list) {
     const idx = Math.floor((Date.parse(i.timestamp) - from) / bucketMs);
-    if (idx >= 0 && idx < n) out[idx].count++;
+    if (idx >= 0 && idx < n) out[idx]!.count++;
   }
   return out.map((b) => ({
     label: bucketMs >= 86400e3 ? new Date(b.t).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : new Date(b.t).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }),
@@ -34,6 +34,6 @@ export function timeBuckets(list: Incident[], from: number, to: number, bucketMs
 
 export function hourOfDay(list: Incident[]) {
   const out = Array.from({ length: 24 }, (_, h) => ({ label: String(h).padStart(2, "0"), count: 0 }));
-  for (const i of list) out[new Date(i.timestamp).getHours()].count++;
+  for (const i of list) out[new Date(i.timestamp).getHours()]!.count++;
   return out;
 }

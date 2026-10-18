@@ -14,14 +14,14 @@ export function validatePolygon(points: Pt[]): string | null {
   for (let i = 0; i < n; i++) {
     for (let j = i + 1; j < n; j++) {
       if (Math.abs(i - j) <= 1 || (i === 0 && j === n - 1)) continue;
-      if (segIntersect(points[i], points[(i + 1) % n], points[j], points[(j + 1) % n]))
+      if (segIntersect(points[i]!, points[(i + 1) % n]!, points[j]!, points[(j + 1) % n]!))
         return "Polygon edges must not cross each other.";
     }
   }
   let area = 0;
   for (let i = 0; i < n; i++) {
-    const [x1, y1] = points[i];
-    const [x2, y2] = points[(i + 1) % n];
+    const [x1, y1] = points[i]!;
+    const [x2, y2] = points[(i + 1) % n]!;
     area += x1 * y2 - x2 * y1;
   }
   if (Math.abs(area / 2) < 0.0005) return "Polygon area is too small.";
@@ -32,8 +32,8 @@ export function validatePolygon(points: Pt[]): string | null {
 export function pointInPolygon([x, y]: Pt, poly: Pt[]) {
   let inside = false;
   for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-    const [xi, yi] = poly[i];
-    const [xj, yj] = poly[j];
+    const [xi, yi] = poly[i]!;
+    const [xj, yj] = poly[j]!;
     if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
   }
   return inside;

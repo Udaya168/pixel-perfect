@@ -5,9 +5,9 @@
 const env = import.meta.env;
 
 export const config = {
-  apiBaseUrl: (env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") || null,
+  apiBaseUrl: (env["VITE_API_BASE_URL"] as string | undefined)?.replace(/\/$/, "") || null,
   /** WebSocket for live detection metadata + incident events. Defaults to `${api}/ws` convention. */
-  wsUrl: (env.VITE_WS_URL as string | undefined) || null,
+  wsUrl: (env["VITE_WS_URL"] as string | undefined) || null,
   pollIntervalMs: 5000,
 };
 

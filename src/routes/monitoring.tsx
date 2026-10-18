@@ -31,7 +31,7 @@ function Monitoring() {
   const stream = useDetectionStream(camId, live && running);
 
   useEffect(() => {
-    if (!camId && cams.data?.length) setCamId(cams.data[0].camera_id);
+    if (!camId && cams.data?.length) setCamId(cams.data[0]!.camera_id);
   }, [cams.data, camId]);
   useEffect(() => setMediaError(false), [camId]);
 

@@ -36,7 +36,7 @@ function Zones() {
   const [drag, setDrag] = useState<number | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
 
-  useEffect(() => { if (!camId && cams.data?.length) setCamId(cams.data[0].camera_id); }, [cams.data, camId]);
+  useEffect(() => { if (!camId && cams.data?.length) setCamId(cams.data[0]!.camera_id); }, [cams.data, camId]);
   const cam = cams.data?.find((c) => c.camera_id === camId);
   const camZones = (zones.data ?? []).filter((z) => z.camera_id === camId);
   const error = draft ? validateDraft(draft, zones.data ?? [], isNew) : null;
